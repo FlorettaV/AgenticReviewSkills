@@ -15,13 +15,10 @@ paragraph — follows the `review-writing` skill.
 
 ## Standing constraints
 
-**First, print the rules block** from the workspace `CLAUDE.md`, with
-`review-followup` as what loaded it. If the workspace has no rules block, say
-so in one line and carry on.
-
-Writes only in `review/`. Read-only over the project folder, no git writes,
-tests only if the workspace `CLAUDE.md` allows them — the rules hold here
-exactly as in a review.
+**First, load and print the rules**: read
+`${CLAUDE_PLUGIN_ROOT}/reference/rules.md` and print its block, with
+`review-followup` as what loaded it. They hold here exactly as in a review.
+This skill writes only in `review/`.
 
 ## Where each finding lives
 

@@ -101,33 +101,25 @@ mr-<n>-<branch-slug>.md   one note per merge request
 `REVIEW.md` lists the project's own rule documents (coding rules, conventions,
 glossary, repo rules). Read the ones it names before judging any code.
 
-## Standing constraints
+## The rules
 
-**First, print the rules block** from the workspace `CLAUDE.md`, with
-`mr-review` as what loaded it. The operator uses it to see the rules were
-re-read, so it comes before any other output. If the workspace has no rules
-block, say so in one line and carry on.
-
-The constraints, repeated here because breaking one silently invalidates the
-review and the operator should never have to restate them:
-
-- **Read-only over the project folder.** No edits, however small or obvious. A
-  fix belongs in a review comment, not in the tree. `review/` is writable.
-- **No git writes.** No `commit`, `add`, `push`, `pull`, `merge`, `checkout`,
-  `branch`, `stash`, `reset`. Reading is expected: `log`, `diff`, `show`,
-  `grep`, `merge-base`, `archive`.
-- **Tests run only if the workspace `CLAUDE.md` allows it.** If it forbids them
-  or says nothing, do not run any, not even one. The review ends with the exact
-  commands for the operator to run. A throwaway script that exercises the code
-  and prints a measurement is *not* the suite — it is encouraged, and it is the
-  difference between a claim and a fact.
-- **The linter is the command the workspace `CLAUDE.md` gives.** If it gives
-  none, find the configured one and say in the note which command you ran.
+**First, load and print the rules**: read
+`${CLAUDE_PLUGIN_ROOT}/reference/rules.md` and print its block, with
+`mr-review` as what loaded it, before any other output. Everything there holds
+for the whole review: the project is read-only, no git writes (fetch included),
+tests and linter as the workspace `CLAUDE.md` says, probes in the scratchpad,
+and the rules block at the top of every sub-agent prompt.
 
 ## Before the review
 
 A few checks, in this order, each one line of output at most, and silent when
 there is nothing to say.
+
+**Start the read-only check.** `touch review/.review-start` (rules §6).
+
+**Is the local copy current?** Compare the server with the local copy for the
+branch under review (rules §2). When they differ, ask the operator to fetch,
+and wait.
 
 **Notes whose MR is done.** For each note in `review/`, read the head commit
 it reviewed from its header and check whether that MR is merged or closed:
@@ -256,7 +248,8 @@ commit boundaries, by topic (removals, a rewritten module, logging, ...). One
 note still covers the branch; its header lists which commits belong to which
 topic.
 
-Topics can go to sub-agents (forks) in parallel. They report back drafts (see
+Topics can go to sub-agents (forks) in parallel. Each prompt starts with the
+rules block, word for word (rules §7). They report back drafts (see
 `review-writing`); they never write to `review/`. Every draft a sub-agent
 proposes is re-checked before it goes into the note: print its cited lines,
 re-run its probe or read the code it quotes. The topic most likely to hold a
@@ -265,11 +258,13 @@ GDPR or security finding is reviewed directly, not delegated.
 ### 9. Prove it before you write it
 
 A finding that can be demonstrated is worth five that are argued. Write a small
-script in the scratchpad that runs the code in question (in Python: imports the
-module) and prints the behaviour with and without the change. Feed it made-up
-data, never a real customer's, so its output can go into a note as it is.
-`git archive <branch> <path> | tar -x` gives you the branch's code without
-touching the working tree.
+script in the scratchpad that runs the code in question and prints the
+behaviour with and without the change. Rules §4 says how, without writing into
+the project: the branch's code extracted into the scratchpad with
+`git archive … | tar -x -C <scratchpad>`, only the slice the probe needs,
+`python3 -B`, made-up data. A probe that would need a build or half the
+platform is handed to the operator instead, and the finding says "argued, not
+run".
 
 Then verify every citation. Line numbers are **on the MR branch, never on
 main** — an inserted hunk shifts everything below it:
@@ -398,6 +393,8 @@ operator actually decides on:
   it stands. Anything less is a ticket.
 - **What could not be checked**, and why. An unrun linter is a gap in the
   review, not a silent pass.
+- **The read-only check**, in one line: run it as rules §6 says, just before
+  publishing, and write what it found. Never clean up what it finds.
 
 ### The reply
 

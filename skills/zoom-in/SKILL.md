@@ -17,16 +17,11 @@ next developer, as `review-writing` describes.
 
 ## Constraints while you do it
 
-**First, print the rules block** from the workspace `CLAUDE.md`, with
-`zoom-in` as what loaded it. The operator uses it to see the rules were
-re-read, so it comes before any other output. If the workspace has no rules
-block, say so in one line and carry on.
-
-Read-only over the project folder — no edits, however obvious the fix is; it
-goes in the **Fix** section, not the tree. No git writes (`log`, `diff`, `show`,
-`grep`, `archive` are all fine). Tests run only if the workspace `CLAUDE.md`
-allows it; if it forbids them or says nothing, run none, not even one.
-`review/` is writable, and the scratchpad is where probe scripts go.
+**First, load and print the rules**: read
+`${CLAUDE_PLUGIN_ROOT}/reference/rules.md` and print its block, with `zoom-in`
+as what loaded it, before any other output. They hold here exactly as in a
+review: however obvious the fix is, it goes in the **Fix** section, not the
+tree; probes follow rules §4.
 
 `review/REVIEW.md` says how each score column is scored and holds the scale;
 read it rather than assuming, because it changes.
@@ -55,9 +50,10 @@ Line numbers are on the branch, never on main. `git grep` returns every hit,
 and the first is often the wrong one — print them all and pick deliberately.
 
 Where the claim is about behaviour rather than structure, prove it. A short
-script that runs the code in question (in Python: imports the module) and
-prints the outcome with and without the change turns an argument into a fact,
-and it is not the test suite. Two lines of real output beat three paragraphs of
+script that runs the code in question and prints the outcome with and without
+the change turns an argument into a fact, and it is not the test suite. Run it
+as rules §4 says: in the scratchpad, `python3 -B`, made-up data, no writes into
+the project. Two lines of real output beat three paragraphs of
 reasoning:
 
 ```

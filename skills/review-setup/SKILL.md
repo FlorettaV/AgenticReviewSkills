@@ -18,7 +18,8 @@ Templates are in `${CLAUDE_SKILL_DIR}/templates/`.
 
 ```
 <workspace>/
-  CLAUDE.md            the environment and the rules block
+  CLAUDE.md            the environment only: commands, code host, branch
+  .claude/settings.json  deny rules for sessions started here
   <project>/           the code under review. Read-only to every review skill
   review/
     REVIEW.md          the review standard. Starts small and grows
@@ -37,10 +38,12 @@ creating anything.
 
 ## While setting up
 
-The project folder is read-only from the first step. This skill writes only the
-workspace `CLAUDE.md` and files in `review/`. No git writes. Do not run the
-tests or the linter to find out whether they work — ask, and record what the
-operator says.
+**First, load and print the rules**: read
+`${CLAUDE_PLUGIN_ROOT}/reference/rules.md` and print its block, with
+`review-setup` as what loaded it. The project folder is read-only from the
+first step. This skill writes only the workspace `CLAUDE.md`, the workspace's
+`.claude/settings.json` and files in `review/`. Do not run the tests or the
+linter to find out whether they work — ask, and record what the operator says.
 
 If the workspace already has a `CLAUDE.md` or a `review/` folder, read them
 first. Add what is missing and show the operator the difference. Never
@@ -97,9 +100,15 @@ for word, and listed in `REVIEW.md` like any other rule doc.
 Fill the templates. Keep every `<…>` the operator did not answer as a visible
 `TODO:` line, never as an invented value.
 
-- **`CLAUDE.md`** from `templates/CLAUDE.md`. The rules block must say exactly
-  what question 3 and 4 answered: "Never run the test suite" when tests are
-  off, or the command when they are on.
+- **`CLAUDE.md`** from `templates/CLAUDE.md`: the environment only, no rules.
+  Its Tests and Linter lines say exactly what questions 3 and 4 answered
+  (never run, with the command for the operator; may be run, with the command;
+  or no test suite), because the rules block prints them.
+- **`.claude/settings.json`** in the workspace, from `templates/settings.json`,
+  with `<project>` replaced by the project folder's name. Never in the user's
+  settings: the deny rules must hold only for sessions started in this
+  workspace. If the workspace already has one, add the deny rules to it and
+  show the difference.
 - **`review/REVIEW.md`** from `templates/REVIEW.md`. Fill §1 from the
   environment, the rule-doc list from question 2, §3 from question 6 (each
   area with a short name in bold, as the §2 rules have), §4 from
@@ -126,6 +135,5 @@ Answer in a few lines:
   `review/TODO.md`, so a review stays on track; say 'show the A list' whenever
   you like."
 
-Then print the rules block from the new `CLAUDE.md`, with `review-setup` as
-what loaded it, so the operator sees the rules exactly as the review skills
-will print them.
+Then print the rules block again, now with the new environment lines filled in,
+so the operator sees it exactly as the review skills will print it.

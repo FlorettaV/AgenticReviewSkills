@@ -76,8 +76,9 @@ list".
 
 ## What is shared and what is yours
 
-- **Shared, in this plugin:** the review method, the scoring columns, how a
-  finding is worded, and the records. Change these with an MR on this repo, so
+- **Shared, in this plugin:** the review method, the read-only rules
+  (`reference/rules.md`), the scoring columns, how a finding is worded, and the
+  records. Change these with an MR on this repo, so
   everyone moves together.
 - **Per project, in `review/REVIEW.md`:** the rules, the architecture, the
   scale and how each column is scored. It starts with defaults and grows as

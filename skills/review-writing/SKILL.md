@@ -210,8 +210,12 @@ they name code and changes, and rewording them without knowing the code is how
 a fix stops being exact.
 
 Start a **fresh** sub-agent: a general-purpose agent, never a fork, because a
-fork carries the writer's context and reads past the same jargon. Give it:
+fork carries the writer's context and reads past the same jargon. Start it from
+the workspace, and give it:
 
+- the rules block from `${CLAUDE_PLUGIN_ROOT}/reference/rules.md`, word for
+  word, at the top of the prompt: a fresh agent sees nothing else of them, and
+  it must not write anywhere;
 - the path of this file, `${CLAUDE_SKILL_DIR}/SKILL.md`, to read first;
 - the drafts;
 - each finding's title and What happens.

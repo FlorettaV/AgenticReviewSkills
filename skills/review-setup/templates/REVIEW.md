@@ -13,14 +13,11 @@ turns out wrong in practice, it gets rewritten here, with the date.
 
 ## 1. How we work
 
-**Reviews are read-only.** No edits to `<project>/`, no git writes. Reading git
-history and diffing branches is fine.
+**Reviews are read-only**, by the rules the review skills bring with them. The
+test and linter commands are in the workspace `CLAUDE.md`.
 
-**Tests:** <never run by the reviewer; the review ends with the exact command
-for the operator | run with `<command>` from `<folder>`>.
-
-**Linter:** `<command>` from `<folder>`. <What it selects and ignores, if that
-matters for what counts as a finding.>
+**What the linter covers:** <what it selects and ignores, if that matters for
+what counts as a finding.>
 
 **One note per merge request**, named `mr-<n>-<branch-slug>.md`, in this folder.
 Pre-existing weaknesses go in `ISSUES.md` instead — see §5.
