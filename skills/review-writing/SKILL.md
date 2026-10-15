@@ -61,7 +61,7 @@ question for the author (a `talk`) or a line in `review/ISSUES.md`.
 
 ### A developer finding
 
-A finding from the code half (`D1`, `D2`, …) uses the same draft, with two
+A finding from the developer half (`D1`, `D2`, …) uses the same draft, with two
 differences:
 
 ```

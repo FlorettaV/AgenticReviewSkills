@@ -1,6 +1,6 @@
 ---
 name: mr-review
-description: Review a merge request against review/REVIEW.md in two halves — customer (what a customer or operator experiences in normal use, scored on chance and harm) and code (what we decided in the code: security, GDPR, how failures hide, and what the next developer runs into, walked rule by rule) — with branch identity, verified findings tables, an architecture check, disposition. Use this whenever the operator asks to review an MR, a branch, or a set of changes ("review MR 13", "can we do a review on feat/x", "what do you think of this branch", "code only review of SWD-12", "just the customer side"), when they ask to add the missing half to an existing note ("now do the code side too"), and when they ask what changed on a branch or whether a change is safe to merge. Read-only: it never edits the project, never runs git writes, and runs tests only if the workspace allows it.
+description: Review a merge request against review/REVIEW.md in two halves — customer (what a customer or operator experiences in normal use, scored on chance and harm) and developer (what we decided in the code: security, GDPR, how failures hide, and what the next developer runs into, walked rule by rule) — with branch identity, verified findings tables, an architecture check, disposition. Use this whenever the operator asks to review an MR, a branch, or a set of changes ("review MR 13", "can we do a review on feat/x", "what do you think of this branch", "code only review of SWD-12", "just the customer side"), when they ask to add the missing half to an existing note ("now do the code side too"), and when they ask what changed on a branch or whether a change is safe to merge. Read-only: it never edits the project, never runs git writes, and runs tests only if the workspace allows it.
 ---
 
 # Reviewing an MR
@@ -15,17 +15,21 @@ anything is worded belongs to the `review-writing` skill.
 If the workspace has no `review/REVIEW.md`, stop before reviewing and offer the
 `review-setup` skill. A review without a standard has nothing to score against.
 
-## Two halves: customer and code
+## Two halves: customer and developer
 
-A review asks two different questions, and each gets its own pass, its own
-table and its own columns in the note:
+A review is one piece of work (the method below), seen through two lenses at
+the end. Each lens asks its own question and gets its own table in the note:
 
 | Half | The question | Table in the note | Numbers |
 |---|---|---|---|
 | **customer** | What does a customer or an operator experience in normal use if this merges? Behaviour, looks, wording: how often, and how bad | What the customer experiences | `1`, `2`, … |
-| **code** | What did we decide in the code? Who may do what, where personal data goes, how failures hide, and what the next developer runs into: the §2 rules and the §3 areas of `REVIEW.md`, walked one by one | What the developer sees | `D1`, `D2`, … |
+| **developer** | What did we decide in the code? Who may do what, where personal data goes, how failures hide, and what the next developer runs into: the §2 rules and the §3 areas of `REVIEW.md`, walked one by one | What the developer sees | `D1`, `D2`, … (D for developer) |
 
-Security and GDPR belong to the code half. The harm lands on a customer, but
+These are the only names: the customer half and the developer half. When the
+operator says "code only", "the code side" or "the dev side", they mean the
+developer half.
+
+Security and GDPR belong to the developer half. The harm lands on a customer, but
 the decision is made in the code (who may call this, what goes into the cache,
 what gets logged), and it is found by reading the code, not by imagining a
 customer's day. Chance does not fit them anyway: an attacker does not use the
@@ -35,7 +39,7 @@ system normally.
 only". A half that did not run keeps its section in the note, with one line:
 
 ```
-Not run: code-only review (operator, <date>).
+Not run: developer-only review (operator, <date>).
 ```
 
 That says the ground was not walked, so nobody reads a missing table as "no
@@ -53,13 +57,22 @@ it stands. A nit cannot name that, so it cannot block. A crash, a red suite, a
 server that will not start, a wrong result: those can, whichever pass found
 them.
 
-**One finding, one table.** Anything with a Security or GDPR score goes to the
-developer table, even when a customer also sees it; its detail block then
-says how often. Any other bug the code pass finds goes to the customer table
-when both halves run, scored on Chance and Customer like any other. In a
-code-only review it stays in the developer table, may `block`, and its Rule
-cell says `customer-visible`, so a later customer pass knows it was not scored
-for Chance. One bug never appears in both tables.
+**One finding, one table, one number.** A finding stays in the table it was
+first published in, under its number, for good: the TODO line, "tick D3" and
+any MR comment already pasted all point at that number. A finding the
+developer lens finds stays a `D` finding, also when a customer would see it:
+
+- Anything with a Security or GDPR score is a `D` finding; its detail block
+  says how often a customer meets it.
+- Any other bug the developer lens finds that a customer would see is a `D`
+  finding too, with `customer-visible` in its Rule cell. When the customer
+  half runs (in the same review or later), it adds Chance and Customer to that
+  finding's detail block, and the customer table gets one line under it:
+  "Also seen by customers: D3."
+- A bug the customer lens finds is a customer finding, numbered `1`, `2`, ….
+
+One bug never appears in both tables; the "Also seen by customers" line points,
+it does not repeat.
 
 ## The workspace
 
@@ -112,6 +125,10 @@ review and the operator should never have to restate them:
   none, find the configured one and say in the note which command you ran.
 
 ## The method
+
+Steps 1–4 and 6–9 are the review itself, the same whichever half was asked
+for. Step 5 is the customer lens, step 10 the developer lens. A review that
+runs one half skips only the other half's lens step.
 
 ### 1. Identity before anything
 
@@ -174,7 +191,7 @@ When the evidence is genuinely ambiguous, that is a `talk`, not an assertion in
 either direction. Guessing at intent and being wrong costs the review more
 credibility than asking does.
 
-### 5. Confirm what is actually deployed before scoring Chance
+### 5. Customer lens: confirm what is actually deployed before scoring Chance
 
 Chance is *"how often a customer hits the visible effect"*, so it depends on
 facts a reviewer cannot read off the code: who is actually served, which
@@ -242,18 +259,16 @@ all and pick deliberately. Mark what the MR actually changed: `✎` prefixes a
 line the MR touches, anything after `→` is unchanged code the change *reaches*.
 Confirm with `git diff -U0 <base>..origin/<branch> -- <file>`.
 
-Steps 1–9 are the customer half. Steps 1, 2 and 9 also serve the code half,
-which adds step 10.
+### 10. Developer lens: every §2 rule and §3 area, by name
 
-### 10. The code pass: every §2 rule, by name
+Steps 1–9 find what breaks. This lens finds what the next developer trips
+over, and what the code decided about security and personal data. It has to be
+walked on purpose, because a reviewer looking for bugs reads straight past a
+stale comment.
 
-The customer half finds what breaks. This pass finds what the next developer
-trips over, and it has to be walked on purpose, because a reviewer looking for
-bugs reads straight past a stale comment.
-
-Take the rules in `REVIEW.md` §2 **one at a time**, in their order, and hold
-every changed hunk against each. Not "does anything look off", but, for
-example:
+Take the rules in `REVIEW.md` §2 **one at a time**, in their order, by their
+short name (the bold word in each heading), and hold every changed hunk against
+each. Not "does anything look off", but, for example:
 
 - **Readable**: does every comment the MR adds or sits next to still say what
   the code does? Would a name make someone open the function to find out what
@@ -280,6 +295,10 @@ structure. The topic most likely to hold one of these is never delegated
 the note's "Rules walked" list (below). A rule with no line in that list was
 not walked.
 That list is the guard: a skipped rule becomes visible.
+
+The two §3 questions that matter most were asked earlier and count here too:
+"who else reads this?" (step 3) and keeping the security topic out of a
+helper's hands (step 8). A developer-only review runs them like any other.
 
 Every developer finding is verified like any other (step 9): print the lines,
 run the probe. "This test only checks the text" is proven by showing the
@@ -316,7 +335,7 @@ Both tables share these:
 
 | Column | |
 |---|---|
-| Rule | The §2 rule or §3 area it breaks, by its heading's first word: `Readable`, `Simple`, `Architecture`, `Security`, `GDPR`, … `customer-visible` for a bug in a code-only review |
+| Rule | The §2 rule or §3 area it breaks, by its short name: the bold word in its heading in `REVIEW.md` (`Readable`, `Architecture`, `Linter`, …). `customer-visible` for a bug a customer would see |
 | Next change | How much it costs the next developer who touches this code |
 | Security | Does it let someone do what they should not be able to |
 | GDPR | Does it expose, mix or over-retain personal data |
@@ -336,7 +355,8 @@ Both tables share these:
    the customer half, `### D2. …` in the developer half. One heading per
    finding: no grouped `### 8–11`, no prose-only block, no heading that renames
    the finding. The developer half ends with the "Rules walked" list: one line
-   per §2 rule, naming the findings it produced, or "nothing". The rest of the
+   per §2 rule and per §3 area, by short name, naming the findings it produced,
+   or "nothing". The rest of the
    note follows the section list in `REVIEW.md`.
 3. **Edit**: run the editor pass, then the checker. Both are described there.
 

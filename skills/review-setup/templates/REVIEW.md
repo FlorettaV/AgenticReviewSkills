@@ -44,33 +44,37 @@ rule, they win.
 Each rule says what it means concretely, so a finding can point at the rule and
 the rule can be argued with. A starting set — sharpen it as reviews go.
 
-### Readable by a human
+Each rule has a short name, in bold in its heading. Findings (the Rule column)
+and the note's "Rules walked" list use exactly that name; a new rule gets one
+when it is added.
+
+### **Readable** — by a human
 
 Someone who did not write it can follow it at reading speed. Comments explain
 *why*, not *what*. A comment that no longer matches the code it sits above is a
 finding — a stale comment is worse than none, because it is trusted.
 
-### Manageable by a human
+### **Manageable** — by a human
 
 The next change to this code is obvious and local. A reviewer can name every
 place that must change together. When one behaviour is expressed in two places
 kept in sync by nothing, say so and name both.
 
-### Passes the linter
+### **Linter** — passes it
 
 The command in §1. Do not raise style the linter does not enforce as a finding.
 
-### Abides by the architecture, or moves toward it
+### **Architecture** — abides by it, or moves toward it
 
 Never away from it. See §4.
 
-### Simple
+### **Simple**
 
 Prefer the version with fewer moving parts and fewer states. A new sentinel
 value, a new parameter with a default, or a new protocol method each need to
 earn their place.
 
-### Focused
+### **Focused**
 
 - **No spreading of configuration.** One fact, one home.
 - **No fallback stacked on fallback.** Catch, log, then either stop or do one
@@ -79,13 +83,13 @@ earn their place.
 - **No widening of scope.** A structural change that also adjusts a threshold
   or a config value is two changes.
 
-### Complete
+### **Complete**
 
 When a change touches one of a group — one error path, one of four routes, one
 of two backends — enumerate the group and say what the untouched members now
 disagree with.
 
-### Tested
+### **Tested**
 
 A new test fails when the behaviour it is named for breaks. A test that reads
 the source text, or asserts on exactly how something is written, fails when
@@ -100,7 +104,8 @@ Checked explicitly every review, and the note says so even when the answer is
 "not touched".
 
 <From the setup questions: an admin side, auth, payments, personal data, data
-retention, … One heading each, with what exactly to check. Delete this section's
+retention, … One heading each, with a short name in bold (`### **Payments** —
+refunds and charges`) and what exactly to check. Delete this section's
 placeholder if there is nothing yet.>
 
 ---
@@ -130,8 +135,8 @@ The columns are fixed by the review skills. This section says how to score
 them **for this project**. The defaults below are a starting point.
 
 A review has two halves, each with its own table: **customer** (what a
-customer or operator experiences in normal use) and **code** (what we decided
-in the code: §2 and §3, security and GDPR included). Both run unless the
+customer or operator experiences in normal use) and **developer** (what we
+decided in the code: §2 and §3, security and GDPR included). Both run unless the
 operator asks for one.
 
 ### The customer columns
@@ -146,7 +151,7 @@ operator asks for one.
 
 | Column | How we score it here |
 |---|---|
-| **Rule** | The §2 rule or §3 area it breaks, by its heading's first word: `Readable`, `Manageable`, `Simple`, `Focused`, `Complete`, `Tested`, `Abides` (the architecture), or a §3 area. In a code-only review, a bug a customer would see is marked `customer-visible`. |
+| **Rule** | The §2 rule or §3 area it breaks, by its short name: `Readable`, `Manageable`, `Linter`, `Architecture`, `Simple`, `Focused`, `Complete`, `Tested`, or a §3 area's name. A bug a customer would see is marked `customer-visible`, and keeps its D number when the customer half adds Chance to it. |
 | **Next change** | How much it costs the next developer who touches this code. See below. |
 | **Security** | Does it let someone do something they should not be able to do. |
 | **GDPR** | Does it expose, mix or over-retain personal data. <`–` throughout if the project handles none.> |
@@ -156,7 +161,8 @@ operator asks for one.
 Security and GDPR sit here, not with the customer: the harm lands on a
 customer, but the decision is made in the code, and that is where a reviewer
 finds it. Anything with a Security or GDPR score goes in this table, even when
-a customer also sees it; its detail block then says how often.
+a customer also sees it; its detail block then says how often. A finding never
+changes table or number once published.
 
 ### Layers
 
@@ -242,18 +248,21 @@ Two to six neutral sentences. What the author set out to do and how.
 ## What the customer experiences
 The customer table, worst first, every ✓ empty. Then one detail block per
 finding (`### 1. <title>`), as the review skills describe.
-Or: "Not run: code-only review (operator, <date>)."
+Under the table, for a D finding a customer also sees: "Also seen by
+customers: D<n>."
+Or: "Not run: developer-only review (operator, <date>)."
 
 ## What the developer sees
 The developer table, worst first, every ✓ empty. Then one detail block per
 finding (`### D1. <title>`).
 
 ### Rules walked
-One line per §2 rule and per §3 area: the findings it produced, or "nothing".
+One line per §2 rule and per §3 area, by short name: the findings it produced,
+or "nothing".
 - **Readable**: D1
 - **Manageable**: nothing
 - …
-- **Security**: nothing
+- **Payments**: nothing
 
 Or: "Not run: customer-only review (operator, <date>)."
 

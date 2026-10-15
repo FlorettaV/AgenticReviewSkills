@@ -101,7 +101,8 @@ Fill the templates. Keep every `<…>` the operator did not answer as a visible
   what question 3 and 4 answered: "Never run the test suite" when tests are
   off, or the command when they are on.
 - **`review/REVIEW.md`** from `templates/REVIEW.md`. Fill §1 from the
-  environment, the rule-doc list from question 2, §3 from question 6, §4 from
+  environment, the rule-doc list from question 2, §3 from question 6 (each
+  area with a short name in bold, as the §2 rules have), §4 from
   question 5. Leave the scale, the verdicts and the note shape as the template
   has them.
 - **`review/LOG.md`**, **`review/TODO.md`** and **`review/ISSUES.md`** from
