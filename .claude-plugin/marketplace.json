@@ -1,0 +1,14 @@
+{
+  "name": "review-skills",
+  "description": "Review skills for merge requests, shared by the team.",
+  "owner": {
+    "name": "Florisjan Gerrits"
+  },
+  "plugins": [
+    {
+      "name": "review",
+      "source": ".",
+      "description": "Read-only merge request reviews: verified findings in plain language, a fixed scoring table, and records that stay in step."
+    }
+  ]
+}
