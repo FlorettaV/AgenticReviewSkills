@@ -88,8 +88,8 @@ list".
 
 ## Requirements
 
-`git` with the project's remote branches fetched, and `python3` for the note
-checker.
+`git` with the project's remote branches fetched, and `python3` 3.11 or newer
+for the note checker and renderer.
 
 ## Working on the plugin itself
 
@@ -102,7 +102,9 @@ claude --plugin-dir ~/projects/review-skills
 
 Review the change with the installed, released version, from a workspace that
 has a clone of this repository as its project: the released skills review the
-new ones.
+new ones. The tests run with `python3 -B tests/run.py`; after an intended
+change to the note's shape, `python3 -B tests/run.py --regenerate` rewrites the
+golden note, and its diff shows what changed.
 
 ## Releasing a change to the plugin
 

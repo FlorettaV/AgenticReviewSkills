@@ -1,9 +1,8 @@
 # Reviewing <project>
 
 The single guide for how we review code in `<project>/`: the rules, the
-architecture we measure against, how a finding is scored, and the shape every
-review note takes. How a finding is *worded* is set by the review skills, not
-here.
+architecture we measure against, and how a finding is scored. How a finding is
+*worded*, and the shape of a note, are set by the review skills, not here.
 
 This file starts small on purpose. When a review turns up a rule we were
 applying but had not written down, it gets added. When a score or a verdict
@@ -19,7 +18,8 @@ test and linter commands are in the workspace `CLAUDE.md`.
 **What the linter covers:** <what it selects and ignores, if that matters for
 what counts as a finding.>
 
-**One note per merge request**, named `mr-<n>-<branch-slug>.md`, in this folder.
+**One note per merge request**: its data file `mr-<n>-<branch-slug>.toml`, and
+the `.md` rendered from it, in this folder.
 Pre-existing weaknesses go in `ISSUES.md` instead — see §5.
 
 **Merge requests are identified by branch.** <With `gh`/`glab`: the CLI maps
@@ -226,58 +226,9 @@ were reverted?
 
 ### The shape of a note
 
-Sections with nothing to say are kept and marked "not touched".
-
-````markdown
-# MR <n> — `<branch>`
-
-Reviewed <date>, read-only. Base `<merge-base>`, head `<sha>`.
-
-| | |
-|---|---|
-| Commits | `<sha>` <subject>, … |
-| Diff | <n> files, +<a> / −<b> |
-
-## What it does
-Two to six neutral sentences. What the author set out to do and how.
-
-## What the customer experiences
-The customer table, worst first, every ✓ empty. Then one detail block per
-finding (`### 1. <title>`), as the review skills describe.
-Under the table, for a D finding a customer also sees: "Also seen by
-customers: D<n>."
-Or: "Not run: developer-only review (operator, <date>)."
-
-## What the developer sees
-The developer table, worst first, every ✓ empty. Then one detail block per
-finding (`### D1. <title>`).
-
-### Rules walked
-One line per §2 rule and per §3 area, by short name: the findings it produced,
-or "nothing".
-- **Readable**: D1
-- **Manageable**: nothing
-- …
-- **Payments**: nothing
-
-Or: "Not run: customer-only review (operator, <date>)."
-
-## Verified as not a problem
-
-## Architecture check
-Against §4.
-
-## Interaction with other open MRs
-
-## Suggested disposition
-What blocks merge, what becomes a ticket, what needs the author.
-
-## Commands for the operator
-```
-<test command>
-<linter command>
-```
-````
+The note is rendered by the plugin from its data file, `mr-<n>-<branch>.toml`,
+by `scripts/note.py`: the shape is the same in every project and is not set
+here.
 
 ---
 

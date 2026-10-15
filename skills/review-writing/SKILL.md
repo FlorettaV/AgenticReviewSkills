@@ -22,25 +22,41 @@ Writing happens in three steps, always in this order:
 Keeping the facts apart from the wording means the editor can change every
 sentence without changing a single fact.
 
+Both live in the note's data file, `review/mr-<n>-<branch-slug>.toml`: the
+draft under each finding's `[finding.draft]`, the written text in its fields
+(`title`, `what_happens`, `why`, `fix`, `justify`). The Markdown note people
+read is rendered from that file by `scripts/note.py` and never written by hand;
+the shape of a finding's block, its small score table and the ⚠️/❗ markers
+come from the renderer. `mr-review` says how the file is laid out; the
+example in `${CLAUDE_PLUGIN_ROOT}/tests/fixtures/valid.toml` shows a complete
+one.
+
 ## 1. The draft
 
-One block per finding. Every field is filled, or says `none`.
+One per finding, in the data file. The scores and the cause sit on the
+finding itself; the rest of the draft under `[finding.draft]`. Every field is
+filled, or says `none`.
 
-```
-#            3
-Scores       Chance 3 · Customer 3 · Fix effort 1 · Verdict ticket
-Cause        ✎ shop/settings.py:40 → shop/pricing.py:142
-Sequence     1. We delete the upgrade step for old settings files.
-             2. An old shop's settings still say currency:, and nothing reads that key any more.
-             3. The shop starts without prices. Every product page shows "price on request".
-Who sees it  every visitor of a shop installed before the change
-Mechanism    the four or five lines that matter, quoted, each with file:line (verified on the branch)
-Fix          the smallest change that closes it; a structural fix named separately, if there is one
-Justify      one sentence per score of 3 or more
-Proof        what a probe printed, if one ran
-Must keep    the conditions, numbers and qualifiers the finding depends on:
-             "only shops installed before version 2", "only when the cache is on"
-Glossary     domain nouns used above, and whether the project's glossary has them
+```toml
+[[finding]]
+id = "3"
+chance = 3
+customer = 3
+fix_effort = 1
+verdict = "ticket"
+cause = "✎ `shop/settings.py:40` → `shop/pricing.py:142`"
+
+[finding.draft]
+sequence = ["We delete the upgrade step for old settings files.",
+            "An old shop's settings still say currency:, and nothing reads that key any more.",
+            "The shop starts without prices. Every product page shows \"price on request\"."]
+who_sees_it = "every visitor of a shop installed before the change"
+mechanism = "the four or five lines that matter, quoted, each with file:line (verified on the branch)"
+fix = "the smallest change that closes it; a structural fix named separately, if there is one"
+justify = "one sentence per score of 3 or more"
+proof = "what a probe printed, if one ran"
+must_keep = ["only shops installed before version 2", "only when the cache is on"]
+glossary = "domain nouns used above, and whether the project's glossary has them"
 ```
 
 What the draft must hold before anything is written:
@@ -64,13 +80,22 @@ question for the author (a `talk`) or a line in `review/ISSUES.md`.
 A finding from the developer half (`D1`, `D2`, …) uses the same draft, with two
 differences:
 
-```
-#            D2
-Scores       Rule Manageable · Next change 3 · Security – · GDPR – · Layers – · Fix effort 1 · Verdict ticket
-Sequence     1. We write the fallback colour for the buttons in three places.
-             2. A developer changes it for the chat button.
-             3. The send button keeps the old colour, and no test notices.
-Who sees it  the next developer who changes a button's colour
+```toml
+[[finding]]
+id = "D2"
+rule = "Manageable"
+next_change = 3
+security = "–"
+gdpr = "–"
+layers = "–"
+fix_effort = 1
+verdict = "ticket"
+
+[finding.draft]
+sequence = ["We write the fallback colour for the buttons in three places.",
+            "A developer changes it for the chat button.",
+            "The send button keeps the old colour, and no test notices."]
+who_sees_it = "the next developer who changes a button's colour"
 ```
 
 - **The developer is the actor.** The Sequence ends with what the next person
@@ -157,16 +182,15 @@ someone then sees.
 
 ### What happens / Why / Fix
 
-Every finding in a note, and every zoom-in, has the same shape:
+Every finding in a note, and every zoom-in, has the same shape. In the data
+file it is four fields; the renderer turns them into the block:
 
-```
-### <n>. <the title, word for word>        (### D<n>. for a developer finding)
-
-<its score row>
-
-**What happens.** ...
-**Why.** ...
-**Fix.** ...
+```toml
+title = "..."          # the heading, the table's Finding cell and the TODO line
+what_happens = '''...'''
+why = '''...'''
+fix = '''...'''
+justify = '''...'''    # one sentence per score of 3 or more
 ```
 
 The three parts answer three different questions. Blending them into prose
@@ -249,17 +273,19 @@ editor. Two readers who each guard one thing would otherwise trade "you lost
 my nuance" and "that is still unclear" without end. The editor reads once;
 the writer decides, and that is final.
 
-Then run the checker on the note:
+Then check the data file and render the note:
 
 ```
-python3 ${CLAUDE_SKILL_DIR}/check_note.py review/<the note>.md
+python3 -B ${CLAUDE_PLUGIN_ROOT}/scripts/note.py render review/<the note>.toml
 ```
 
-It reports a table row with the wrong number of cells, a title over two
-sentences or holding code, a detail heading that is not the title word for
-word, a block without its score row or one of the three labels, and the banned
-nouns in titles and What happens. Fix what it reports. Whether the words are
-right is still a read.
+`render` checks first and writes nothing when the check fails. It reports a
+title over two sentences or holding code or a file, a banned noun in a title or
+What happens, a file citation in What happens, a missing field or score, a
+score of 3 or more without its justify sentence, a finding for a half that did
+not run, an empty Rules walked list, and any e-mail address outside the
+reserved example domains. Fix what it reports in the data file, and render
+again. Whether the words are right is still a read.
 
 ## Replying
 

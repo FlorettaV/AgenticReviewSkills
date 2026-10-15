@@ -21,7 +21,8 @@ review/                       the review records
   ISSUES.md                   pre-existing weaknesses a review bumped into
   TODO.md                     open items. R = review found, A = additional
   RULES.md                    the operator's own rules, if given at setup
-  mr-<n>-<branch-slug>.md     one note per merge request
+  mr-<n>-<branch-slug>.toml   one note per merge request, as data
+  mr-<n>-<branch-slug>.md     the same note, rendered for people to read
   <stack>-stack-plan.md       one per stack of branches
   probes/mr-<n>/              probe scripts kept for an MR, made-up data only
 

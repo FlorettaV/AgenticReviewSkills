@@ -29,7 +29,9 @@ One layout, the same in every project (also in `reference/rules.md` §0):
     TODO.md                    open items: R = review found, A = additional
     ISSUES.md                  pre-existing weaknesses a review bumped into
     RULES.md                   the operator's own rules, if given at setup
-    mr-<n>-<branch-slug>.md    one note per merge request
+    mr-<n>-<branch-slug>.toml  one note per merge request: the data, which skills
+                               read and write
+    mr-<n>-<branch-slug>.md    the same note, rendered from it for people
     <stack>-stack-plan.md      one per stack of branches
     probes/mr-<n>/             probe scripts kept for an MR, made-up data only
 ```
@@ -83,7 +85,7 @@ confirm instead of a blank. Read-only commands only:
 - **Architecture docs:** `ARCHITECTURE.md`, `docs/architecture*`, `docs/adr/`,
   diagrams (`*.pdf`, `*.drawio`, `*.mmd`), an import-guard or layering test.
 - **Tools on this machine:** `python3`, `uv`/`uvx`, `node`. The note checker
-  needs `python3`.
+  and renderer need `python3` 3.11 or newer (`python3 -c 'import tomllib'`).
 
 ## 2. Ask, in one message
 

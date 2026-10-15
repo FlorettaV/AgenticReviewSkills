@@ -27,7 +27,7 @@ them in the same step.
 
 | Place | What it holds |
 |---|---|
-| The note, `review/mr-<n>-<branch>.md` | The finding's row (✓ box, scores, verdict) and its detail block |
+| The note's data file, `review/mr-<n>-<branch>.toml` | The finding itself: ticked, scores, verdict, text and draft. The `.md` next to it is rendered from this file, never edited by hand |
 | `review/TODO.md` | One `R` line per finding, under the MR's heading |
 | The stack plan, `review/<stack>-stack-plan.md` | For a stack: the step's row, items carried to the end, watch lists |
 | The review log, `review/LOG.md` | One row per review: the worst row and its verdict |
@@ -76,7 +76,8 @@ it is understood, intended, ticketed, will be talked about, or fixed — "1 is
 intended, check", "I can see the replacement ticket, check". Do not tick on
 your own judgement.
 
-- Tick the note's row **and** the TODO line.
+- Set `ticked = true` on the finding in the note's data file, **and** tick the
+  TODO line.
 - Add the reason to the TODO line, dated: "Operator 2026-10-12: intended; they
   will talk to the author".
 - A ticked row stays where it is while its MR is open. Never delete or move a
@@ -134,8 +135,11 @@ lines under a "Sweep — … — to plan" heading, "R" the review findings. Skip
 When the operator supplies a fact that changes a score — what is deployed,
 what was decided, what is served — re-score where everyone can see it:
 
-- Change the row, and show where it came from: `` `–` (was `block`) ``.
-- Add a **Re-scored <date>.** paragraph at the top of the detail block: the
+- Change the score in the data file, and keep the old value under the
+  finding's `[finding.was]` (`verdict = "block"`): the note then shows
+  `– (was block)`.
+- Write a **Re-scored <date>.** paragraph into the finding's `rescored` field,
+  which the note shows at the top of the detail block: the
   new fact, where it came from by role (the operator, the author in an MR
   comment, the deploy config — never a person's name), and what it changes.
 - Update the TODO line and, if it was the worst row, the review log in
@@ -194,11 +198,11 @@ line in TODO.
 
 ## Before you answer
 
-Re-read every place you touched and check they agree: the ✓ box, the verdict,
-the TODO line, the plan, the log row. Then run the note checker:
+Re-read every place you touched and check they agree: the data file, the TODO
+line, the plan, the log row. Then check the data file and render the note:
 
 ```
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/review-writing/check_note.py review/<the note>.md
+python3 -B ${CLAUDE_PLUGIN_ROOT}/scripts/note.py render review/<the note>.toml
 ```
 
 Answer in a few lines: what changed, where. No recap of findings that did not

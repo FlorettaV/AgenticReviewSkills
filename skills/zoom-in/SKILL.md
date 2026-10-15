@@ -28,13 +28,17 @@ read it rather than assuming, because it changes.
 
 ## The steps
 
-1. **Start from the draft.** If the finding is in a note, rebuild its draft (the
-   shape is in `review-writing`) from the note and the branch. If it is new — a
-   bug the operator points at — fill the draft from scratch.
+1. **Start from the draft.** If the finding is in a note, its draft is in the
+   note's data file, under the finding's `[finding.draft]`. If it is new — a
+   bug the operator points at — fill the draft from scratch (the shape is in
+   `review-writing`).
 2. **Verify the evidence** (below). Every line in Mechanism is printed on the
    branch before it is quoted.
 3. **Write** title, What happens, Why and Fix from the draft.
-4. **Run the editor pass** from `review-writing` on the title and What happens.
+4. **Run the editor pass** from `review-writing` on the title and What happens,
+   unless both are word for word what the data file already holds: that text
+   has had its editor pass. A new fact that changes either one means a new
+   pass.
 5. **Deliver** in the paste format (below).
 
 ## Verify before you publish

@@ -356,21 +356,31 @@ Both tables share these:
 **Load the `review-writing` skill now** (`review:review-writing`), and follow its three steps:
 
 1. **Draft** every finding in its draft shape, from what steps 1–10 verified.
-2. **Write** the note from the drafts. Each half's section holds its table,
-   then for **every** finding, in table order, its detail block: `### 3. …` in
-   the customer half, `### D2. …` in the developer half. One heading per
-   finding: no grouped `### 8–11`, no prose-only block, no heading that renames
-   the finding. The developer half ends with the "Rules walked" list: one line
-   per §2 rule and per §3 area, by short name, naming the findings it produced,
-   or "nothing". The rest of the
-   note follows the section list in `REVIEW.md`.
-3. **Edit**: run the editor pass, then the checker. Both are described there.
+2. **Write** the note's data file, `review/mr-<n>-<branch-slug>.toml`. It is
+   the note: every skill reads and writes it, and the Markdown note is rendered
+   from it. `${CLAUDE_PLUGIN_ROOT}/tests/fixtures/valid.toml` is a complete
+   example. It holds:
+   - `format = 2`, and an `[mr]` table: `number`, `branch`, `reviewed`,
+     `base`, `head`, `halves` (`["customer", "developer"]`, or the one that
+     ran), `commits`, `diff`, `what_it_does`, `verified`, `architecture`,
+     `interaction`, `disposition`, `readonly_check` and `commands`. A field
+     left out renders as "Not touched.";
+   - one `[[finding]]` per finding, in table order, worst first per half:
+     its `id` (`3`, `D2`), title, scores, verdict, cause, What happens, Why,
+     Fix, justify, `ticked = false`, and its `[finding.draft]`;
+   - `[rules_walked]`, when the developer half ran: one key per §2 rule and
+     per §3 area, by short name, naming the findings it produced, or
+     "nothing".
+3. **Edit**: run the editor pass, then render. Both are described there.
+   `render` checks the file first and writes the note only when nothing is
+   wrong.
 
 Then print the content at every cited line on the branch and read it back one
 last time.
 
-Sections with nothing to say are kept and marked "not touched". An empty
-section is information — it says the ground was walked.
+Sections with nothing to say are kept and marked "not touched" (the renderer
+does it for a field left out). An empty section is information — it says the
+ground was walked.
 
 Two things are worth stating plainly in every note, because they are what the
 operator actually decides on:
