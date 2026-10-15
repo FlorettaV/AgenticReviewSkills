@@ -23,8 +23,10 @@ as what loaded it, before any other output. They hold here exactly as in a
 review: however obvious the fix is, it goes in the **Fix** section, not the
 tree; probes follow rules §4.
 
-`review/REVIEW.md` says how each score column is scored and holds the scale;
-read it rather than assuming, because it changes.
+The columns, default scales and verdicts are in
+`${CLAUDE_PLUGIN_ROOT}/reference/scoring.md`; `review/REVIEW.md` §5 says how
+they are scored in this project. Read both rather than assuming: §5 changes.
+A note in an older format (no `.toml`) can be explained, not updated.
 
 ## The steps
 

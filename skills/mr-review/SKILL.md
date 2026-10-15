@@ -6,10 +6,12 @@ description: Review a merge request against review/REVIEW.md in two halves — c
 # Reviewing an MR
 
 `review/REVIEW.md` is the project's review standard: the rules, the
-architecture we measure against, how each score column is scored and the note
-shape. It is rewritten as reviews teach it things, so **read
-it first, every time**. This skill is the working method, and it fixes the parts
-that are the same in every project: the score columns and the records. How
+architecture we measure against, and how the columns are scored here. It is
+rewritten as reviews teach it things, so **read it first, every time**. What is
+the same in every project comes with the plugin and is read with it: the
+columns, default scales and verdicts in
+`${CLAUDE_PLUGIN_ROOT}/reference/scoring.md`, the note's shape in its renderer,
+and the rules in `reference/rules.md`. This skill is the working method. How
 anything is worded belongs to the `review-writing` skill.
 
 If the workspace has no `review/REVIEW.md`, stop before reviewing and offer the
@@ -103,6 +105,28 @@ A few checks, in this order, each one line of output at most, and silent when
 there is nothing to say.
 
 **Start the read-only check.** `touch review/.review-start` (rules §6).
+
+**Is `REVIEW.md` in the current format?** Its first line says
+`<!-- review format: <n> -->`; no line means format 1. The plugin writes
+format 2. When it is older, it still holds parts that now come with the plugin
+(the columns, scales, verdicts and note shape) and may lack parts it should
+have. Offer once:
+
+> This project's REVIEW.md is from an older version of the skills. Update it?
+> Your rules, areas, architecture and calibration stay; I'll show the
+> difference before writing anything.
+
+On a yes: take out what is now in `reference/scoring.md` and the renderer,
+keep every project-specific word (§1–§4, how §5 scores here, any change to a
+default scale), add the sections of the current template it lacks, raise the
+stamp, and show the difference before writing. Never overwrite what the
+project wrote. Move a review log found in it to `review/LOG.md`. Without a yes,
+review against it as it is.
+
+**Notes in an older format.** A note with no `.toml` next to it, or one
+`note.py check` calls older, is shown as it is: say so in one line ("MR 7's
+note is from before the data format; I can read it, not update it"), and offer
+a new review for a full one. It is never rewritten.
 
 **Is the local copy current?** Compare the server with the local copy for the
 branch under review (rules §2). When they differ, ask the operator to fetch,
@@ -314,42 +338,9 @@ change it lets through.
 
 ### The columns
 
-Fixed, the same in every project. `REVIEW.md` says how each is scored there.
-Both tables share these:
-
-| Column | |
-|---|---|
-| ✓ | `[ ]` until the operator says the row is handled. The reviewer leaves every box empty |
-| # | The finding's number: `1`, `2`, … in the customer table, `D1`, `D2`, … in the developer table. It never changes once published |
-| Finding | The title, written by `review-writing` |
-| Fix effort | How much work the fix is |
-| Verdict | `block`, `ticket`, `talk` or `–` |
-| Cause ✎ → Effect | Where to start reading |
-
-**What the customer experiences** adds, between Finding and Fix effort:
-
-| Column | |
-|---|---|
-| Chance | How often a customer hits the visible effect in normal use |
-| Customer | How bad it is for the customer when it happens |
-
-```
-| ✓ | # | Finding | Chance | Customer | Fix effort | Verdict | Cause ✎ → Effect |
-```
-
-**What the developer sees** adds:
-
-| Column | |
-|---|---|
-| Rule | The §2 rule or §3 area it breaks, by its short name: the bold word in its heading in `REVIEW.md` (`Readable`, `Architecture`, `Linter`, …). `customer-visible` for a bug a customer would see |
-| Next change | How much it costs the next developer who touches this code |
-| Security | Does it let someone do what they should not be able to |
-| GDPR | Does it expose, mix or over-retain personal data |
-| Layers | How many separate places absorb this one failure |
-
-```
-| ✓ | # | Finding | Rule | Next change | Security | GDPR | Layers | Fix effort | Verdict | Cause ✎ → Effect |
-```
+Fixed, the same in every project, in `${CLAUDE_PLUGIN_ROOT}/reference/scoring.md`
+with the default scales and the verdicts. `REVIEW.md` §5 says how they are
+scored in this project. The renderer draws the tables.
 
 ### Writing the note
 

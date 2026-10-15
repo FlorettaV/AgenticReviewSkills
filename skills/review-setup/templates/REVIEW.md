@@ -1,3 +1,4 @@
+<!-- review format: 2 -->
 # Reviewing <project>
 
 The single guide for how we review code in `<project>/`: the rules, the
@@ -126,109 +127,21 @@ change that weakens it to make an import work is a finding.>
 
 ---
 
-## 5. How a finding is scored
+## 5. How we score here
 
-The columns are fixed by the review skills. This section says how to score
-them **for this project**. The defaults below are a starting point.
+The columns, the default scales and the verdicts are the same in every project
+and come with the review skills (`reference/scoring.md` in the plugin). This
+section says how to score **for this project**, and where its scale differs
+from the defaults. Where they disagree, this section wins here.
 
-A review has two halves, each with its own table: **customer** (what a
-customer or operator experiences in normal use) and **developer** (what we
-decided in the code: §2 and §3, security and GDPR included). Both run unless the
-operator asks for one.
-
-### The customer columns
-
-| Column | How we score it here |
+| Column | Here |
 |---|---|
-| **Chance** | How often <a customer / a user> hits the **visible effect** in normal use. Depends on facts the code does not carry (<who is served, what is live>), so ask rather than infer. |
+| **Chance** | How often <a customer / a user / another service> hits the visible effect in normal use. What is live: <which sites, shops or tenants are served; which settings are on>. Ask when it is not known. |
 | **Customer** | How bad it is for <the person affected> when it happens. |
-| **Fix effort** | How much work the fix is. This drives sequencing. |
+| **GDPR** | <Scored: the project handles <which personal data> | `–` throughout: the project handles none.> |
 
-### The developer columns
-
-| Column | How we score it here |
-|---|---|
-| **Rule** | The §2 rule or §3 area it breaks, by its short name: `Readable`, `Manageable`, `Linter`, `Architecture`, `Simple`, `Focused`, `Complete`, `Tested`, or a §3 area's name. A bug a customer would see is marked `customer-visible`, and keeps its D number when the customer half adds Chance to it. |
-| **Next change** | How much it costs the next developer who touches this code. See below. |
-| **Security** | Does it let someone do something they should not be able to do. |
-| **GDPR** | Does it expose, mix or over-retain personal data. <`–` throughout if the project handles none.> |
-| **Layers** | How many separate places absorb this one failure. See below. |
-| **Fix effort** | As in the customer table. |
-
-Security and GDPR sit here, not with the customer: the harm lands on a
-customer, but the decision is made in the code, and that is where a reviewer
-finds it. Anything with a Security or GDPR score goes in this table, even when
-a customer also sees it; its detail block then says how often. A finding never
-changes table or number once published.
-
-### Layers
-
-Counts **places that absorb the same failure** with the same outcome, so no log
-line says which one fired.
-
-| | |
-|---|---|
-| `–` | Not a layering problem. |
-| `0` | Counted, and there is one place. |
-| `1` | One guard plus one documented degradation, in the same function. |
-| `2` | Two places in one module can swallow the same input. |
-| `3` ⚠️ | Two modules, or a catch inside a catch. |
-| `4` ❗ | Three or more modules, each covering for the same failure. |
-| `5` ❗ | As 4, and one layer substitutes a value, so the failure has no log line anywhere. |
-
-Name every place in the detail block. A Layers score without that list cannot
-be argued with.
-
-### Next change
-
-| | |
-|---|---|
-| `–` | Not about the next change. |
-| `0` | Noticed. Costs nothing. |
-| `1` | A reader pauses, then gets it. |
-| `2` | The next change needs a second look somewhere the reader would not think to look. |
-| `3` ⚠️ | The next change is likely to miss a place, with nothing to warn them. |
-| `4` ❗ | Something actively misleads: a comment that says the opposite, a test that passes when the behaviour is broken. |
-| `5` ❗ | It fails now: a crash, a red suite, a server that will not start. Usually a `block`. |
-
-### The scale
-
-`0`–`5`, or **`–`** when the column does not apply. Do not score a column just
-because it exists.
-
-- **❗ on 4–5**, **⚠️ on 3**, plain below.
-- **Anything ≥ 3 needs one sentence of justification** in its detail block.
-- **`?` in Chance** when nobody has measured it. The first fix is then a
-  measurement.
-- A score that depends on merge order is written `0 → 4 ❗ (if MR n lands)`.
-
-### Verdict
-
-A recommendation. The operator decides.
-
-| | |
-|---|---|
-| `block` ❗ | Does not merge until this is fixed on the branch. Argued, not asserted: the detail block names what a customer or operator would experience if it merged as it stands. The same rule in both tables: a developer finding blocks when it can name that (a crash, a red suite), and a nit never can. |
-| `ticket` | Merges. The fix becomes tracked work — say where it goes. |
-| `talk` | The author has to answer something first, and the answer decides. |
-| `–` | Recorded, nothing to do. |
-
-### Three kinds of problem, two destinations
-
-| | Where it goes |
-|---|---|
-| Defect in the new code | Finding. |
-| The new code hands old code something it was never given, and the old code breaks | **Finding.** The MR owns it. |
-| Pre-existing weakness the change merely revealed | `ISSUES.md`. |
-
-The revert test separates the last two: would this still be broken if the MR
-were reverted?
-
-### The shape of a note
-
-The note is rendered by the plugin from its data file, `mr-<n>-<branch>.toml`,
-by `scripts/note.py`: the shape is the same in every project and is not set
-here.
+<Changes to a default scale, with the date and why: "Layers 2 also covers two
+modules that share one log line (2026-11-02, after MR 18)." None yet.>
 
 ---
 

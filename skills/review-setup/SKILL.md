@@ -130,8 +130,9 @@ Fill the templates. Keep every `<…>` the operator did not answer as a visible
 - **`review/REVIEW.md`** from `templates/REVIEW.md`. Fill §1 from the
   environment, the rule-doc list from question 2, §3 from question 6 (each
   area with a short name in bold, as the §2 rules have), §4 from
-  question 5. Leave the scale, the verdicts and the note shape as the template
-  has them.
+  question 5, §5 from question 6 (who meets the effect, what is live, whether
+  there is personal data). The columns, scales, verdicts and note shape are
+  not in it: they come with the plugin. Keep its format stamp on line 1.
 - **`review/LOG.md`**, **`review/TODO.md`** and **`review/ISSUES.md`** from
   their templates. The records name roles ("the operator", "the author"),
   never people.

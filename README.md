@@ -79,12 +79,15 @@ list".
 ## What is shared and what is yours
 
 - **Shared, in this plugin:** the review method, the read-only rules
-  (`reference/rules.md`), the scoring columns, how a finding is worded, and the
-  records. Change these with an MR on this repo, so
-  everyone moves together.
-- **Per project, in `review/REVIEW.md`:** the rules, the architecture, the
-  scale and how each column is scored. It starts with defaults and grows as
-  reviews teach it things.
+  (`reference/rules.md`), the columns, default scales and verdicts
+  (`reference/scoring.md`), the note's shape (its renderer), how a finding is
+  worded, and the records. Change these with an MR on this repo, so everyone
+  moves together.
+- **Per project, in `review/REVIEW.md`:** the project's rules, the areas that
+  get extra attention, the architecture, and how the columns are scored there.
+  It starts small and grows as reviews teach it things. It carries a format
+  number; when the plugin's format moves on, the next review offers to update
+  it and shows the difference first.
 
 ## Requirements
 
