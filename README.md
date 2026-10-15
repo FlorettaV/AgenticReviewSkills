@@ -7,7 +7,7 @@ code knows what broke.
 | Skill | What it does |
 |---|---|
 | `review-setup` | Sets up a review workspace for a new project. Asks where the project is, its rules, how to run tests and the linter, and where the architecture is described |
-| `mr-review` | Reviews a branch: identity, the diff, verified findings, a scoring table, what blocks merge |
+| `mr-review` | Reviews a branch in two halves — what the customer experiences and what the developer sees — with verified findings, a scoring table per half, and what blocks merge |
 | `zoom-in` | Opens up one finding as What happens / Why / Fix, ready to paste into an MR comment |
 | `review-followup` | Ticks, re-scores and parks items, and walks through the parked items once a review is done |
 | `review-writing` | Turns findings into plain language, then has a fresh editor pass check the wording |
@@ -51,6 +51,19 @@ say:
 
 `review-setup` asks a handful of questions and writes the workspace
 `CLAUDE.md` and a `review/` folder. Then: "review MR 12" or "review feat/x".
+
+A review runs both halves by default:
+
+- **customer**: what a customer or an operator experiences if this merges —
+  behaviour, looks, security, GDPR. Findings `1`, `2`, …
+- **code**: what the next developer runs into, walked rule by rule against
+  `REVIEW.md` §2. Findings `D1`, `D2`, …
+
+Ask for one with "review MR 12, code only" or "customer only", and add the
+other later with "now do the customer side too". A skipped half is marked
+"not run" in the note, and a code-only review says up front that security and
+GDPR were not checked. Either half can block: a finding blocks when it names
+what breaks if the MR merges as it stands.
 
 ## What is shared and what is yours
 

@@ -85,6 +85,13 @@ When a change touches one of a group — one error path, one of four routes, one
 of two backends — enumerate the group and say what the untouched members now
 disagree with.
 
+### Tested
+
+A new test fails when the behaviour it is named for breaks. A test that reads
+the source text, or asserts on exactly how something is written, fails when
+the code is rephrased and passes when it is wrong. Read what the assertion
+reads, not what the test is called.
+
 ---
 
 ## 3. Extra attention
@@ -122,7 +129,11 @@ change that weakens it to make an import work is a finding.>
 The columns are fixed by the review skills. This section says how to score
 them **for this project**. The defaults below are a starting point.
 
-### The columns
+A review has two halves, each with its own table: **customer** (what a
+customer or operator experiences) and **code** (what the next developer runs
+into). Both run unless the operator asks for one.
+
+### The customer columns
 
 | Column | How we score it here |
 |---|---|
@@ -130,7 +141,7 @@ them **for this project**. The defaults below are a starting point.
 | **Customer** | How bad it is for <the person affected> when it happens. |
 | **Security** | Does it let someone do something they should not be able to do. |
 | **GDPR** | Does it expose, mix or over-retain personal data. <`–` throughout if the project handles none.> |
-| **Arch** | Does it move away from §4, or break a rule in §2. |
+| **Arch** | Does it move away from §4. A §2 rule broken with no effect on the customer goes in the developer table instead. |
 | **Layers** | How many separate places absorb this one failure. See below. |
 | **Fix effort** | How much work the fix is. This drives sequencing. |
 
@@ -152,6 +163,26 @@ line says which one fired.
 Name every place in the detail block. A Layers score without that list cannot
 be argued with.
 
+### The developer columns
+
+| Column | How we score it here |
+|---|---|
+| **Rule** | The §2 rule it breaks, by its heading's first word: `Readable`, `Manageable`, `Simple`, `Focused`, `Complete`, `Tested`, … In a code-only review, a bug a customer would see is marked `customer-visible`. |
+| **Next change** | How much it costs the next developer who touches this code. See below. |
+| **Fix effort** | As in the customer table. |
+
+### Next change
+
+| | |
+|---|---|
+| `–` | Not about the next change. |
+| `0` | Noticed. Costs nothing. |
+| `1` | A reader pauses, then gets it. |
+| `2` | The next change needs a second look somewhere the reader would not think to look. |
+| `3` ⚠️ | The next change is likely to miss a place, with nothing to warn them. |
+| `4` ❗ | Something actively misleads: a comment that says the opposite, a test that passes when the behaviour is broken. |
+| `5` ❗ | It fails now: a crash, a red suite, a server that will not start. Usually a `block`. |
+
 ### The scale
 
 `0`–`5`, or **`–`** when the column does not apply. Do not score a column just
@@ -169,7 +200,7 @@ A recommendation. The operator decides.
 
 | | |
 |---|---|
-| `block` ❗ | Does not merge until this is fixed on the branch. Argued, not asserted: the detail block names what a customer or operator would experience if it merged as it stands. |
+| `block` ❗ | Does not merge until this is fixed on the branch. Argued, not asserted: the detail block names what a customer or operator would experience if it merged as it stands. The same rule in both tables: a developer finding blocks when it can name that (a crash, a red suite), and a nit never can. |
 | `ticket` | Merges. The fix becomes tracked work — say where it goes. |
 | `talk` | The author has to answer something first, and the answer decides. |
 | `–` | Recorded, nothing to do. |
@@ -203,9 +234,22 @@ Reviewed <date>, read-only. Base `<merge-base>`, head `<sha>`.
 ## What it does
 Two to six neutral sentences. What the author set out to do and how.
 
-## Findings
-The scoring table, worst first, every ✓ empty. Then one detail block per
-finding, as the review skills describe.
+## What the customer experiences
+The customer table, worst first, every ✓ empty. Then one detail block per
+finding (`### 1. <title>`), as the review skills describe.
+Or: "Not run: code-only review (operator, <date>)."
+
+## What the developer sees
+The developer table, worst first, every ✓ empty. Then one detail block per
+finding (`### D1. <title>`).
+
+### Rules walked
+One line per §2 rule: the findings it produced, or "nothing".
+- **Readable**: D1
+- **Manageable**: nothing
+- …
+
+Or: "Not run: customer-only review (operator, <date>)."
 
 ## Verified as not a problem
 
@@ -213,7 +257,7 @@ finding, as the review skills describe.
 Against §4.
 
 ## Rules check
-Against §2 and §3, naming each §3 area explicitly.
+Against §3, naming each area explicitly. (§2 is walked in the developer half.)
 
 ## Interaction with other open MRs
 

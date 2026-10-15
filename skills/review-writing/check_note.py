@@ -6,10 +6,12 @@ Reports, and exits 1 when anything is wrong:
   - a table row whose cell count differs from its header;
   - a finding title over two sentences, or holding a backtick (code names
     belong in the Cause column);
-  - a finding with no `### <n>. <title>` heading, or a heading that is not the
-    table's title word for word;
-  - a detail block without its score row or one of What happens / Why / Fix;
-  - a banned noun in a title or a What happens paragraph.
+  - a finding with no `### <n>. <title>` heading (`### D<n>.` for a developer
+    finding), or a heading that is not the table's title word for word;
+  - a detail block without its score row (`| Chance |` for a customer finding,
+    `| Rule |` for a developer one) or one of What happens / Why / Fix;
+  - a banned noun in a title or a What happens paragraph;
+  - a developer half that ran but has no `### Rules walked` list.
 
 Checks the shape only. Whether the words are right is still a read.
 """
@@ -52,9 +54,10 @@ def main(path: Path) -> int:
             problems.append(f"line {i}: {cells(line)} borders, header on line "
                             f"{header_line} has {header}")
 
+    # Customer findings are numbered 1, 2, …; developer findings D1, D2, …
     rows = {}
-    for m in re.finditer(r"^\| \[.\] \| (\d+) \| ([^|]*?) \|", text, re.M):
-        rows[int(m.group(1))] = m.group(2).strip()
+    for m in re.finditer(r"^\| \[.\] \| (D?\d+) \| ([^|]*?) \|", text, re.M):
+        rows[m.group(1)] = m.group(2).strip()
     for n, title in rows.items():
         if sentences(title) > 2:
             problems.append(f"#{n}: title has {sentences(title)} sentences (max 2)")
@@ -64,9 +67,10 @@ def main(path: Path) -> int:
             problems.append(f"#{n}: title uses \"{word}\"; say what happens instead")
 
     blocks = {}
-    for part in re.split(r"\n(?=### \d+\. )", text)[1:]:
-        m = re.match(r"### (\d+)\. (.*)", part)
-        blocks[int(m.group(1))] = (m.group(2).strip(), part.split("\n## ")[0])
+    for part in re.split(r"\n(?=### D?\d+\. )", text)[1:]:
+        m = re.match(r"### (D?\d+)\. (.*)", part)
+        body = re.split(r"\n## |\n### Rules walked", part)[0]
+        blocks[m.group(1)] = (m.group(2).strip(), body)
     for n, title in rows.items():
         if n not in blocks:
             problems.append(f"#{n}: no detail heading `### {n}. <title>`")
@@ -74,7 +78,8 @@ def main(path: Path) -> int:
         heading, body = blocks[n]
         if heading != title:
             problems.append(f"#{n}: heading is not the table title word for word")
-        if "| Chance |" not in body:
+        score_row = "| Rule |" if n.startswith("D") else "| Chance |"
+        if score_row not in body:
             problems.append(f"#{n}: no score row under the heading")
         what = re.search(r"\*\*What happens\.\*\*(.*?)(?=\*\*Why\.\*\*|$)", body, re.S)
         for word in BANNED.findall(what.group(1) if what else ""):
@@ -82,6 +87,11 @@ def main(path: Path) -> int:
         missing = [label for label in LABELS if label not in body]
         if missing:
             problems.append(f"#{n}: missing {', '.join(missing)}")
+
+    # A developer half that ran must say what each §2 rule turned up.
+    dev = re.search(r"^## What the developer sees\n(.*?)(?=^## |\Z)", text, re.M | re.S)
+    if dev and "Not run" not in dev.group(1) and "### Rules walked" not in dev.group(1):
+        problems.append("developer half: no `### Rules walked` list")
 
     for p in problems:
         print(p)

@@ -1,6 +1,6 @@
 ---
 name: review-followup
-description: Keep the review records straight after a review note exists — tick rows, re-score a finding the operator corrected, park items, carry items to the end of a stack, walk through the parked items once a review's findings are all handled, and keep the note, review/TODO.md, the stack plan and the review log in REVIEW.md saying the same thing. Use this whenever the operator responds to findings already written down ("1 is intended, check", "tick 2 and 3", "I'll talk to them", "we decided to remove it", "note this for the end", "keep this for a recheck", "mark a cleanup on these at the end", "let's wait here", "let's go through the other finds"), and whenever a finding's premise changes after the note was written. Writes only in review/; never edits the project, never runs git writes, never runs tests unless the workspace allows it.
+description: Keep the review records straight after a review note exists — tick rows, re-score a finding the operator corrected, park items, carry items to the end of a stack, walk through the parked items once a review's findings are all handled, and keep the note, review/TODO.md, the stack plan and the review log in REVIEW.md saying the same thing. Use this whenever the operator responds to findings already written down ("1 is intended, check", "tick 2 and 3", "D1 is fine", "I'll talk to them", "we decided to remove it", "note this for the end", "keep this for a recheck", "mark a cleanup on these at the end", "let's wait here", "let's go through the other finds"), and whenever a finding's premise changes after the note was written. Writes only in review/; never edits the project, never runs git writes, never runs tests unless the workspace allows it.
 ---
 
 # After the note: keeping the records straight
@@ -42,6 +42,7 @@ the `mr-review` skill), never as a finding.
 
 ```
 - [ ] **R12** (MR 13) <title, word for word from the note>
+- [ ] **R13** (MR 13 D1) <a developer finding's title, word for word>
 - [ ] **A40** (MR 13) <something noticed while reviewing MR 13>
 - [ ] **A41** (zoom-in MR 13 #2) <something noticed while explaining finding 2>
 - [ ] **A42** (–) <something noticed outside any review>
@@ -51,6 +52,8 @@ the `mr-review` skill), never as a finding.
   noticed while doing something else.
 - **The tag in brackets is where it came from.** It is what lets the
   walk-through below find a review's parked items. Every new line gets one.
+  A developer finding's tag carries its `D` number, because the note numbers
+  the two halves separately: "tick D1" and "tick 1" are different rows.
   Lines written before tags existed are left as they are.
 - **Numbers continue from the highest in the file** and are never reused.
   Check before adding: `grep -o '\*\*[RA][0-9]*' review/TODO.md | sort -V | tail`.

@@ -1,6 +1,6 @@
 ---
 name: mr-review
-description: Review a merge request against review/REVIEW.md — branch identity, diff, verified findings table, architecture and rules checks, disposition. Use this whenever the operator asks to review an MR, a branch, or a set of changes ("review MR 13", "can we do a review on feat/x", "what do you think of this branch"), and also when they ask what changed on a branch or whether a change is safe to merge. Read-only: it never edits the project, never runs git writes, and runs tests only if the workspace allows it.
+description: Review a merge request against review/REVIEW.md in two halves — customer (what a customer or operator experiences, scored on chance and harm) and code (what the next developer runs into, walked rule by rule) — with branch identity, verified findings tables, architecture and rules checks, disposition. Use this whenever the operator asks to review an MR, a branch, or a set of changes ("review MR 13", "can we do a review on feat/x", "what do you think of this branch", "code only review of SWD-12", "just the customer side"), when they ask to add the missing half to an existing note ("now do the code side too"), and when they ask what changed on a branch or whether a change is safe to merge. Read-only: it never edits the project, never runs git writes, and runs tests only if the workspace allows it.
 ---
 
 # Reviewing an MR
@@ -14,6 +14,44 @@ anything is worded belongs to the `review-writing` skill.
 
 If the workspace has no `review/REVIEW.md`, stop before reviewing and offer the
 `review-setup` skill. A review without a standard has nothing to score against.
+
+## Two halves: customer and code
+
+A review asks two different questions, and each gets its own pass, its own
+table and its own columns in the note:
+
+| Half | The question | Table in the note | Numbers |
+|---|---|---|---|
+| **customer** | What does a customer or an operator experience if this merges? Behaviour, looks, security, GDPR, what gets logged or cached | What the customer experiences | `1`, `2`, … |
+| **code** | What does the next developer run into? The §2 rules of `REVIEW.md`, walked one by one | What the developer sees | `D1`, `D2`, … |
+
+**Both run by default.** The operator can ask for one: "customer only", "code
+only". A half that did not run keeps its section in the note, with one line:
+
+```
+Not run: code-only review (operator, <date>).
+```
+
+That says the ground was not walked, so nobody reads a missing table as "no
+problems". **A code-only review states at the top of the note, under the
+header: "Security and GDPR not checked."** A quick code pass must not pass for a
+full review.
+
+**"Now do the other half"** on an existing note runs the missing pass and
+fills its section. Numbers carry on from what is there; nothing already
+published is renumbered.
+
+**The half is where we looked, not how bad it is.** One `block` rule holds in
+both tables: a blocking row names what someone experiences if this merges as
+it stands. A nit cannot name that, so it cannot block. A crash, a red suite, a
+server that will not start, a wrong result: those can, whichever pass found
+them.
+
+**A bug the code pass finds goes to the customer table** when both halves
+run, scored on Chance and Customer like any other. In a code-only review it
+stays in the developer table, may `block`, and its Rule cell says
+`customer-visible`, so a later customer pass knows it was not scored for
+Chance. One bug never appears in both tables.
 
 ## The workspace
 
@@ -195,36 +233,96 @@ all and pick deliberately. Mark what the MR actually changed: `✎` prefixes a
 line the MR touches, anything after `→` is unchanged code the change *reaches*.
 Confirm with `git diff -U0 <base>..origin/<branch> -- <file>`.
 
+Steps 1–9 are the customer half. Steps 1, 2 and 9 also serve the code half,
+which adds step 10.
+
+### 10. The code pass: every §2 rule, by name
+
+The customer half finds what breaks. This pass finds what the next developer
+trips over, and it has to be walked on purpose, because a reviewer looking for
+bugs reads straight past a stale comment.
+
+Take the rules in `REVIEW.md` §2 **one at a time**, in their order, and hold
+every changed hunk against each. Not "does anything look off", but, for
+example:
+
+- **Readable**: does every comment the MR adds or sits next to still say what
+  the code does? Would a name make someone open the function to find out what
+  it is?
+- **Manageable**: what does the next change to this code have to touch? Is one
+  fact now written in two places, kept the same by nothing?
+- **Simple**: does each new parameter, sentinel, fallback or setting earn its
+  place? What would the code look like without it?
+- **Focused**: does the MR also change something its title does not mention?
+- **Tested**: does each new test fail when the behaviour breaks, or only when
+  the text changes?
+
+The rules are the project's, so the list is whatever §2 holds. A rule that is
+not worth checking is rewritten or dropped in `REVIEW.md`, never quietly skipped
+here.
+
+**Write down what each rule turned up, "nothing" included**, in the note's
+"Rules walked" list (below). A rule with no line in that list was not walked.
+That list is the guard: a skipped rule becomes visible.
+
+Every developer finding is verified like any other (step 9): print the lines,
+run the probe. "This test only checks the text" is proven by showing the
+change it lets through.
+
 ## Output
 
 ### The columns
 
 Fixed, the same in every project. `REVIEW.md` says how each is scored there.
+Both tables share these:
 
 | Column | |
 |---|---|
 | ✓ | `[ ]` until the operator says the row is handled. The reviewer leaves every box empty |
-| # | The finding's number. It never changes once published |
+| # | The finding's number: `1`, `2`, … in the customer table, `D1`, `D2`, … in the developer table. It never changes once published |
 | Finding | The title, written by `review-writing` |
+| Fix effort | How much work the fix is |
+| Verdict | `block`, `ticket`, `talk` or `–` |
+| Cause ✎ → Effect | Where to start reading |
+
+**What the customer experiences** adds, between Finding and Fix effort:
+
+| Column | |
+|---|---|
 | Chance | How often a customer hits the visible effect |
 | Customer | How bad it is for the customer when it happens |
 | Security | Does it let someone do what they should not be able to |
 | GDPR | Does it expose, mix or over-retain personal data |
 | Arch | Does it move away from the target architecture or break a rule |
 | Layers | How many separate places absorb this one failure |
-| Fix effort | How much work the fix is |
-| Verdict | `block`, `ticket`, `talk` or `–` |
-| Cause ✎ → Effect | Where to start reading |
+
+```
+| ✓ | # | Finding | Chance | Customer | Security | GDPR | Arch | Layers | Fix effort | Verdict | Cause ✎ → Effect |
+```
+
+**What the developer sees** adds:
+
+| Column | |
+|---|---|
+| Rule | The §2 rule it breaks, by its heading's first word: `Readable`, `Simple`, … `customer-visible` for a bug in a code-only review |
+| Next change | How much it costs the next developer who touches this code |
+
+```
+| ✓ | # | Finding | Rule | Next change | Fix effort | Verdict | Cause ✎ → Effect |
+```
 
 ### Writing the note
 
 **Load the `review-writing` skill now** (`review:review-writing`), and follow its three steps:
 
-1. **Draft** every finding in its draft shape, from what steps 1–9 verified.
-2. **Write** the note from the drafts: the findings table, then for **every**
-   finding, in table order, its detail block. One heading per finding: no
-   grouped `### 8–11`, no prose-only block, no heading that renames the finding.
-   The rest of the note follows the section list in `REVIEW.md`.
+1. **Draft** every finding in its draft shape, from what steps 1–10 verified.
+2. **Write** the note from the drafts. Each half's section holds its table,
+   then for **every** finding, in table order, its detail block: `### 3. …` in
+   the customer half, `### D2. …` in the developer half. One heading per
+   finding: no grouped `### 8–11`, no prose-only block, no heading that renames
+   the finding. The developer half ends with the "Rules walked" list: one line
+   per §2 rule, naming the findings it produced, or "nothing". The rest of the
+   note follows the section list in `REVIEW.md`.
 3. **Edit**: run the editor pass, then the checker. Both are described there.
 
 Then print the content at every cited line on the branch and read it back one
@@ -244,17 +342,20 @@ operator actually decides on:
 
 ### The reply
 
-Short, as `review-writing` describes under "Replying": the full findings table,
-what blocks, the questions for the operator, the commands. The What / Why / Fix
-stays in the note until the operator asks; the `zoom-in` skill produces it.
+Short, as `review-writing` describes under "Replying": both findings tables in
+full (or the one that ran, with a line saying which did not), what blocks, the
+questions for the operator, the commands. The What / Why / Fix stays in the
+note until the operator asks; the `zoom-in` skill produces it.
 
 ### On publishing
 
 Three small writes, then hand over to `review-followup` for everything the
 operator says afterwards:
 
-- a row in the review log in `review/REVIEW.md`;
-- one `R` line per finding in `review/TODO.md`, under a heading for this MR;
+- a row in the review log in `review/REVIEW.md`. Its worst row may be a `D`
+  row; say which half a single-half review covered;
+- one `R` line per finding in `review/TODO.md`, under a heading for this MR,
+  developer findings tagged with their number: `(MR <n> D1)`;
 - for a stack, the step's row in the plan file.
 
 ## Parking what you did not come for

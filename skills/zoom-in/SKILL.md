@@ -1,6 +1,6 @@
 ---
 name: zoom-in
-description: Explain one finding, bug or defect in depth as What happens / Why / Fix, with verified file:line citations, ready to paste into an MR comment. Use this whenever the operator points at a single item and wants it opened up — "zoom in on 3", "explain finding 2", "what's actually wrong with this one", "why does that happen" — and whenever a defect needs explaining well enough that someone else can act on it. Covers one item only; other findings stay parked.
+description: Explain one finding, bug or defect in depth as What happens / Why / Fix, with verified file:line citations, ready to paste into an MR comment. Use this whenever the operator points at a single item and wants it opened up — "zoom in on 3", "zoom in on D2", "explain finding 2", "what's actually wrong with this one", "why does that happen" — and whenever a defect needs explaining well enough that someone else can act on it. Covers one item only; other findings stay parked.
 ---
 
 # Zooming in on one finding
@@ -8,6 +8,11 @@ description: Explain one finding, bug or defect in depth as What happens / Why /
 One finding, opened up: its score row, then its title and What happens / Why /
 Fix. **Load the `review-writing` skill** (`review:review-writing`) — it owns the shape and every rule
 about wording. This skill owns the evidence and the paste format.
+
+The finding can come from either half of the note. A customer finding (`3`)
+carries the customer score row; a developer finding (`D2`) carries its own
+(Rule, Next change, Fix effort, Verdict), and its What happens follows the
+next developer, as `review-writing` describes.
 
 ## Constraints while you do it
 

@@ -59,6 +59,29 @@ What the draft must hold before anything is written:
 A draft that cannot fill Sequence or Who sees it is not a finding yet. It is a
 question for the author (a `talk`) or a line in `review/ISSUES.md`.
 
+### A developer finding
+
+A finding from the code half (`D1`, `D2`, …) uses the same draft, with two
+differences:
+
+```
+#            D2
+Scores       Rule Manageable · Next change 3 · Fix effort 1 · Verdict ticket
+Sequence     1. We write the fallback colour for the buttons in three places.
+             2. A developer changes it for the chat button.
+             3. The send button keeps the old colour, and no test notices.
+Who sees it  the next developer who changes a button's colour
+```
+
+- **The developer is the actor.** The Sequence ends with what the next person
+  who touches this code runs into: the place they miss, the comment that
+  misleads them, the test that stays green.
+- **Who sees it** is that developer, named by what they set out to do ("the
+  next developer who adds a brand"), not "maintainers".
+
+Everything else — Mechanism, Fix, Must keep, Justify — is the same, and so are
+the writing rules and the editor pass below.
+
 ## 2. Writing
 
 ### Say it as a sequence, not as a category
@@ -128,7 +151,7 @@ someone then sees.
 Every finding in a note, and every zoom-in, has the same shape:
 
 ```
-### <n>. <the title, word for word>
+### <n>. <the title, word for word>        (### D<n>. for a developer finding)
 
 <its score row>
 
@@ -142,7 +165,11 @@ loses all three.
 
 - **What happens.** The **Sequence**, written out for someone who has not read
   the code. The trigger, then what the customer or operator sees. No file
-  names. The test: could the operator repeat it to a colleague?
+  names. The test: could the operator repeat it to a colleague? For a
+  developer finding, the trigger is the next change and the end is what that
+  developer runs into: "A developer changes the chat button's colour. The send
+  button keeps the old one, and no test notices." Still no file names: they go
+  in Why.
 - **Why.** The **Mechanism**. This is where the citations live. Mark what the
   change touched (✎) and unchanged code it reaches (→). Most real findings sit
   on the → side: the new code is fine, and an old reader breaks. Quote the four
@@ -226,8 +253,9 @@ right is still a read.
 The note is complete. The reply is short.
 
 - **Compact by default.** A reply about findings shows the **full** findings
-  table — every column, never a cut-down one — then what blocks, the questions
-  for the operator, and the commands. What / Why / Fix stays in the note until
+  tables — both halves, every column, never a cut-down one; a half that did
+  not run gets one line saying so — then what blocks, the questions for the
+  operator, and the commands. What / Why / Fix stays in the note until
   the operator asks for one.
 - **Answer, stop, wait.** Do not re-show a table, re-list findings or recap
   earlier conclusions unless asked.
