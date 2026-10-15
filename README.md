@@ -80,3 +80,18 @@ what breaks if the MR merges as it stands.
 
 `git` with the project's remote branches fetched, and `python3` for the note
 checker.
+
+## Releasing a change to the plugin
+
+Teammates only receive a change when the `version` in
+`.claude-plugin/plugin.json` changes: with a version set, `claude plugin update`
+ignores new commits until the number moves. So:
+
+1. Make the change on a branch, and review it like any other MR.
+2. Once it has passed review and is merged, raise the version in
+   `.claude-plugin/plugin.json` in its own commit: the minor number for a
+   change in how reviews run, the patch number for wording and fixes.
+3. Push. Teammates get it with the update commands above.
+
+Never push to the shared branch without raising the version, or the change
+reaches nobody.
