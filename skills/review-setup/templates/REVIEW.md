@@ -278,7 +278,6 @@ What blocks merge, what becomes a ticket, what needs the author.
 
 ## 6. Review log
 
-Worst row per MR, for triage. Full tables in the notes. Newest first.
-
-| MR | Branch | Reviewed | Headline | Worst row |
-|---|---|---|---|---|
+Kept in `LOG.md`, next to this file: one row per review, newest first. This
+file is the standard and is read in full at the start of every review, so the
+record of what was reviewed lives apart from it.

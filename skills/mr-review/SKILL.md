@@ -6,8 +6,8 @@ description: Review a merge request against review/REVIEW.md in two halves — c
 # Reviewing an MR
 
 `review/REVIEW.md` is the project's review standard: the rules, the
-architecture we measure against, how each score column is scored, the note
-shape and the review log. It is rewritten as reviews teach it things, so **read
+architecture we measure against, how each score column is scored and the note
+shape. It is rewritten as reviews teach it things, so **read
 it first, every time**. This skill is the working method, and it fixes the parts
 that are the same in every project: the score columns and the records. How
 anything is worded belongs to the `review-writing` skill.
@@ -77,6 +77,7 @@ this skill writes `origin/main`, it means the remote's default branch.
 
 ```
 REVIEW.md                 the project's review standard. Read first, every time
+LOG.md                    one row per review, newest first
 ISSUES.md                 pre-existing weaknesses a review bumped into
 TODO.md                   open items — R = review found, A = additional
 <stack>-stack-plan.md     one per stack of branches
@@ -366,8 +367,8 @@ note until the operator asks; the `zoom-in` skill produces it.
 Three small writes, then hand over to `review-followup` for everything the
 operator says afterwards:
 
-- a row in the review log in `review/REVIEW.md`. Its worst row may be a `D`
-  row; say which half a single-half review covered;
+- a row at the top of the review log, `review/LOG.md`. Its worst row may be a
+  `D` row; say which half a single-half review covered;
 - one `R` line per finding in `review/TODO.md`, under a heading for this MR,
   developer findings tagged with their number: `(MR <n> D1)`;
 - for a stack, the step's row in the plan file.

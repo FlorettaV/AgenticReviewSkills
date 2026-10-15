@@ -52,6 +52,7 @@ scratchpad, never in the project.
 review/                       the review workspace. Writable.
   REVIEW.md                   how we review. The authority, and it evolves —
                               read it at the start of every review
+  LOG.md                      one row per review, newest first
   ISSUES.md                   pre-existing weaknesses a review bumped into
   TODO.md                     open items. R = review found, A = additional
   mr-<n>-<branch-slug>.md     one note per merge request

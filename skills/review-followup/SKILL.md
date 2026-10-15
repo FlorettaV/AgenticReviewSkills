@@ -1,6 +1,6 @@
 ---
 name: review-followup
-description: Keep the review records straight after a review note exists — tick rows, re-score a finding the operator corrected, park items, carry items to the end of a stack, walk through the parked items once a review's findings are all handled, and keep the note, review/TODO.md, the stack plan and the review log in REVIEW.md saying the same thing. Use this whenever the operator responds to findings already written down ("1 is intended, check", "tick 2 and 3", "D1 is fine", "I'll talk to them", "we decided to remove it", "note this for the end", "keep this for a recheck", "mark a cleanup on these at the end", "let's wait here", "let's go through the other finds"), and whenever a finding's premise changes after the note was written. Writes only in review/; never edits the project, never runs git writes, never runs tests unless the workspace allows it.
+description: Keep the review records straight after a review note exists — tick rows, re-score a finding the operator corrected, park items, carry items to the end of a stack, walk through the parked items once a review's findings are all handled, and keep the note, review/TODO.md, the stack plan and the review log in review/LOG.md saying the same thing. Use this whenever the operator responds to findings already written down ("1 is intended, check", "tick 2 and 3", "D1 is fine", "I'll talk to them", "we decided to remove it", "note this for the end", "keep this for a recheck", "mark a cleanup on these at the end", "let's wait here", "let's go through the other finds"), and whenever a finding's premise changes after the note was written. Writes only in review/; never edits the project, never runs git writes, never runs tests unless the workspace allows it.
 ---
 
 # After the note: keeping the records straight
@@ -33,7 +33,7 @@ them in the same step.
 | The note, `review/mr-<n>-<branch>.md` | The finding's row (✓ box, scores, verdict) and its detail block |
 | `review/TODO.md` | One `R` line per finding, under the MR's heading |
 | The stack plan, `review/<stack>-stack-plan.md` | For a stack: the step's row, items carried to the end, watch lists |
-| The review log in `review/REVIEW.md` | One log row per review: the worst row and its verdict |
+| The review log, `review/LOG.md` | One row per review: the worst row and its verdict |
 
 Pre-existing weaknesses go to `review/ISSUES.md` instead (the revert test in
 the `mr-review` skill), never as a finding.
@@ -121,7 +121,7 @@ what was decided, what is served — re-score where everyone can see it:
 - Add a **Re-scored <date>.** paragraph at the top of the detail block: the
   new fact, who gave it, and what it changes.
 - Update the TODO line and, if it was the worst row, the review log in
-  REVIEW.md.
+  `review/LOG.md`.
 - If the change leaves something behind (a recheck before merge, a smaller
   finding), say so in the same paragraph.
 

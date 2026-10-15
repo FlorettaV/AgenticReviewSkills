@@ -1,6 +1,6 @@
 ---
 name: review-setup
-description: Set up a review workspace for a new project so the review skills can run there — find the project folder, its agent rules, how to run tests and the linter, where the architecture is described, then write the workspace CLAUDE.md and seed review/ (REVIEW.md, TODO.md, ISSUES.md). Use this when the operator wants to start reviewing a project that has no review/ folder yet ("set up reviews for this repo", "install the review skills here", "can we review project X the way we review the others"), and when a review skill finds no review/REVIEW.md.
+description: Set up a review workspace for a new project so the review skills can run there — find the project folder, its agent rules, how to run tests and the linter, where the architecture is described, then write the workspace CLAUDE.md and seed review/ (REVIEW.md, LOG.md, TODO.md, ISSUES.md). Use this when the operator wants to start reviewing a project that has no review/ folder yet ("set up reviews for this repo", "install the review skills here", "can we review project X the way we review the others"), and when a review skill finds no review/REVIEW.md.
 ---
 
 # Setting up a review workspace
@@ -22,6 +22,7 @@ Templates are in `${CLAUDE_SKILL_DIR}/templates/`.
   <project>/           the code under review. Read-only to every review skill
   review/
     REVIEW.md          the review standard. Starts small and grows
+    LOG.md             one row per review, newest first
     TODO.md            open items, R and A numbered
     ISSUES.md          pre-existing weaknesses
 ```
@@ -103,8 +104,8 @@ Fill the templates. Keep every `<…>` the operator did not answer as a visible
   environment, the rule-doc list from question 2, §3 from question 6, §4 from
   question 5. Leave the scale, the verdicts and the note shape as the template
   has them.
-- **`review/TODO.md`** and **`review/ISSUES.md`** from their templates, with
-  the operator's name where the template asks who ticks.
+- **`review/LOG.md`**, **`review/TODO.md`** and **`review/ISSUES.md`** from
+  their templates, with the operator's name where the template asks who ticks.
 
 The review skills come with this plugin, so nothing needs copying. If the
 operator wants the whole team on the same workspace, the plugin can be enabled
