@@ -130,8 +130,9 @@ The columns are fixed by the review skills. This section says how to score
 them **for this project**. The defaults below are a starting point.
 
 A review has two halves, each with its own table: **customer** (what a
-customer or operator experiences) and **code** (what the next developer runs
-into). Both run unless the operator asks for one.
+customer or operator experiences in normal use) and **code** (what we decided
+in the code: §2 and §3, security and GDPR included). Both run unless the
+operator asks for one.
 
 ### The customer columns
 
@@ -139,11 +140,23 @@ into). Both run unless the operator asks for one.
 |---|---|
 | **Chance** | How often <a customer / a user> hits the **visible effect** in normal use. Depends on facts the code does not carry (<who is served, what is live>), so ask rather than infer. |
 | **Customer** | How bad it is for <the person affected> when it happens. |
+| **Fix effort** | How much work the fix is. This drives sequencing. |
+
+### The developer columns
+
+| Column | How we score it here |
+|---|---|
+| **Rule** | The §2 rule or §3 area it breaks, by its heading's first word: `Readable`, `Manageable`, `Simple`, `Focused`, `Complete`, `Tested`, `Abides` (the architecture), or a §3 area. In a code-only review, a bug a customer would see is marked `customer-visible`. |
+| **Next change** | How much it costs the next developer who touches this code. See below. |
 | **Security** | Does it let someone do something they should not be able to do. |
 | **GDPR** | Does it expose, mix or over-retain personal data. <`–` throughout if the project handles none.> |
-| **Arch** | Does it move away from §4. A §2 rule broken with no effect on the customer goes in the developer table instead. |
 | **Layers** | How many separate places absorb this one failure. See below. |
-| **Fix effort** | How much work the fix is. This drives sequencing. |
+| **Fix effort** | As in the customer table. |
+
+Security and GDPR sit here, not with the customer: the harm lands on a
+customer, but the decision is made in the code, and that is where a reviewer
+finds it. Anything with a Security or GDPR score goes in this table, even when
+a customer also sees it; its detail block then says how often.
 
 ### Layers
 
@@ -162,14 +175,6 @@ line says which one fired.
 
 Name every place in the detail block. A Layers score without that list cannot
 be argued with.
-
-### The developer columns
-
-| Column | How we score it here |
-|---|---|
-| **Rule** | The §2 rule it breaks, by its heading's first word: `Readable`, `Manageable`, `Simple`, `Focused`, `Complete`, `Tested`, … In a code-only review, a bug a customer would see is marked `customer-visible`. |
-| **Next change** | How much it costs the next developer who touches this code. See below. |
-| **Fix effort** | As in the customer table. |
 
 ### Next change
 
@@ -244,10 +249,11 @@ The developer table, worst first, every ✓ empty. Then one detail block per
 finding (`### D1. <title>`).
 
 ### Rules walked
-One line per §2 rule: the findings it produced, or "nothing".
+One line per §2 rule and per §3 area: the findings it produced, or "nothing".
 - **Readable**: D1
 - **Manageable**: nothing
 - …
+- **Security**: nothing
 
 Or: "Not run: customer-only review (operator, <date>)."
 
@@ -255,9 +261,6 @@ Or: "Not run: customer-only review (operator, <date>)."
 
 ## Architecture check
 Against §4.
-
-## Rules check
-Against §3, naming each area explicitly. (§2 is walked in the developer half.)
 
 ## Interaction with other open MRs
 

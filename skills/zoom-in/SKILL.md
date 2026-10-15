@@ -11,7 +11,8 @@ about wording. This skill owns the evidence and the paste format.
 
 The finding can come from either half of the note. A customer finding (`3`)
 carries the customer score row; a developer finding (`D2`) carries its own
-(Rule, Next change, Fix effort, Verdict), and its What happens follows the
+(Rule, Next change, Security, GDPR, Layers, Fix effort, Verdict), and its
+What happens follows the
 next developer, as `review-writing` describes.
 
 ## Constraints while you do it

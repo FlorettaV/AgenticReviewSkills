@@ -54,15 +54,17 @@ say:
 
 A review runs both halves by default:
 
-- **customer**: what a customer or an operator experiences if this merges —
-  behaviour, looks, security, GDPR. Findings `1`, `2`, …
-- **code**: what the next developer runs into, walked rule by rule against
-  `REVIEW.md` §2. Findings `D1`, `D2`, …
+- **customer**: what a customer or an operator experiences in normal use if
+  this merges — behaviour, looks, wording; how often and how bad. Findings
+  `1`, `2`, …
+- **code**: what we decided in the code — security, GDPR, how failures hide,
+  and what the next developer runs into — walked rule by rule against
+  `REVIEW.md` §2 and §3. Findings `D1`, `D2`, …
 
 Ask for one with "review MR 12, code only" or "customer only", and add the
 other later with "now do the customer side too". A skipped half is marked
-"not run" in the note, and a code-only review says up front that security and
-GDPR were not checked. Either half can block: a finding blocks when it names
+"not run" in the note, and a customer-only review says up front that security
+and GDPR were not checked. Either half can block: a finding blocks when it names
 what breaks if the MR merges as it stands.
 
 ## What is shared and what is yours

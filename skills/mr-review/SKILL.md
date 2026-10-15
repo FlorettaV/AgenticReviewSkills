@@ -1,6 +1,6 @@
 ---
 name: mr-review
-description: Review a merge request against review/REVIEW.md in two halves — customer (what a customer or operator experiences, scored on chance and harm) and code (what the next developer runs into, walked rule by rule) — with branch identity, verified findings tables, architecture and rules checks, disposition. Use this whenever the operator asks to review an MR, a branch, or a set of changes ("review MR 13", "can we do a review on feat/x", "what do you think of this branch", "code only review of SWD-12", "just the customer side"), when they ask to add the missing half to an existing note ("now do the code side too"), and when they ask what changed on a branch or whether a change is safe to merge. Read-only: it never edits the project, never runs git writes, and runs tests only if the workspace allows it.
+description: Review a merge request against review/REVIEW.md in two halves — customer (what a customer or operator experiences in normal use, scored on chance and harm) and code (what we decided in the code: security, GDPR, how failures hide, and what the next developer runs into, walked rule by rule) — with branch identity, verified findings tables, an architecture check, disposition. Use this whenever the operator asks to review an MR, a branch, or a set of changes ("review MR 13", "can we do a review on feat/x", "what do you think of this branch", "code only review of SWD-12", "just the customer side"), when they ask to add the missing half to an existing note ("now do the code side too"), and when they ask what changed on a branch or whether a change is safe to merge. Read-only: it never edits the project, never runs git writes, and runs tests only if the workspace allows it.
 ---
 
 # Reviewing an MR
@@ -22,8 +22,14 @@ table and its own columns in the note:
 
 | Half | The question | Table in the note | Numbers |
 |---|---|---|---|
-| **customer** | What does a customer or an operator experience if this merges? Behaviour, looks, security, GDPR, what gets logged or cached | What the customer experiences | `1`, `2`, … |
-| **code** | What does the next developer run into? The §2 rules of `REVIEW.md`, walked one by one | What the developer sees | `D1`, `D2`, … |
+| **customer** | What does a customer or an operator experience in normal use if this merges? Behaviour, looks, wording: how often, and how bad | What the customer experiences | `1`, `2`, … |
+| **code** | What did we decide in the code? Who may do what, where personal data goes, how failures hide, and what the next developer runs into: the §2 rules and the §3 areas of `REVIEW.md`, walked one by one | What the developer sees | `D1`, `D2`, … |
+
+Security and GDPR belong to the code half. The harm lands on a customer, but
+the decision is made in the code (who may call this, what goes into the cache,
+what gets logged), and it is found by reading the code, not by imagining a
+customer's day. Chance does not fit them anyway: an attacker does not use the
+system normally.
 
 **Both run by default.** The operator can ask for one: "customer only", "code
 only". A half that did not run keeps its section in the note, with one line:
@@ -33,9 +39,9 @@ Not run: code-only review (operator, <date>).
 ```
 
 That says the ground was not walked, so nobody reads a missing table as "no
-problems". **A code-only review states at the top of the note, under the
-header: "Security and GDPR not checked."** A quick code pass must not pass for a
-full review.
+problems". **A customer-only review states at the top of the note, under the
+header: "Security and GDPR not checked."** A look at the behaviour must not
+pass for a full review.
 
 **"Now do the other half"** on an existing note runs the missing pass and
 fills its section. Numbers carry on from what is there; nothing already
@@ -47,11 +53,13 @@ it stands. A nit cannot name that, so it cannot block. A crash, a red suite, a
 server that will not start, a wrong result: those can, whichever pass found
 them.
 
-**A bug the code pass finds goes to the customer table** when both halves
-run, scored on Chance and Customer like any other. In a code-only review it
-stays in the developer table, may `block`, and its Rule cell says
-`customer-visible`, so a later customer pass knows it was not scored for
-Chance. One bug never appears in both tables.
+**One finding, one table.** Anything with a Security or GDPR score goes to the
+developer table, even when a customer also sees it; its detail block then
+says how often. Any other bug the code pass finds goes to the customer table
+when both halves run, scored on Chance and Customer like any other. In a
+code-only review it stays in the developer table, may `block`, and its Rule
+cell says `customer-visible`, so a later customer pass knows it was not scored
+for Chance. One bug never appears in both tables.
 
 ## The workspace
 
@@ -261,8 +269,15 @@ The rules are the project's, so the list is whatever §2 holds. A rule that is
 not worth checking is rewritten or dropped in `REVIEW.md`, never quietly skipped
 here.
 
-**Write down what each rule turned up, "nothing" included**, in the note's
-"Rules walked" list (below). A rule with no line in that list was not walked.
+Then the §3 areas, the same way: security, personal data, and whatever else
+`REVIEW.md` §3 names. For each, follow the changed code to its decision: who
+can reach this, what it stores, where it logs, what it hands to a shared
+structure. The topic most likely to hold one of these is never delegated
+(step 8).
+
+**Write down what each rule and each area turned up, "nothing" included**, in
+the note's "Rules walked" list (below). A rule with no line in that list was
+not walked.
 That list is the guard: a skipped rule becomes visible.
 
 Every developer finding is verified like any other (step 9): print the lines,
@@ -289,26 +304,25 @@ Both tables share these:
 
 | Column | |
 |---|---|
-| Chance | How often a customer hits the visible effect |
+| Chance | How often a customer hits the visible effect in normal use |
 | Customer | How bad it is for the customer when it happens |
-| Security | Does it let someone do what they should not be able to |
-| GDPR | Does it expose, mix or over-retain personal data |
-| Arch | Does it move away from the target architecture or break a rule |
-| Layers | How many separate places absorb this one failure |
 
 ```
-| ✓ | # | Finding | Chance | Customer | Security | GDPR | Arch | Layers | Fix effort | Verdict | Cause ✎ → Effect |
+| ✓ | # | Finding | Chance | Customer | Fix effort | Verdict | Cause ✎ → Effect |
 ```
 
 **What the developer sees** adds:
 
 | Column | |
 |---|---|
-| Rule | The §2 rule it breaks, by its heading's first word: `Readable`, `Simple`, … `customer-visible` for a bug in a code-only review |
+| Rule | The §2 rule or §3 area it breaks, by its heading's first word: `Readable`, `Simple`, `Architecture`, `Security`, `GDPR`, … `customer-visible` for a bug in a code-only review |
 | Next change | How much it costs the next developer who touches this code |
+| Security | Does it let someone do what they should not be able to |
+| GDPR | Does it expose, mix or over-retain personal data |
+| Layers | How many separate places absorb this one failure |
 
 ```
-| ✓ | # | Finding | Rule | Next change | Fix effort | Verdict | Cause ✎ → Effect |
+| ✓ | # | Finding | Rule | Next change | Security | GDPR | Layers | Fix effort | Verdict | Cause ✎ → Effect |
 ```
 
 ### Writing the note

@@ -28,7 +28,7 @@ One block per finding. Every field is filled, or says `none`.
 
 ```
 #            3
-Scores       Chance 3 · Customer 3 · Security – · GDPR – · Arch 1 · Layers 0 · Fix effort 1 · Verdict ticket
+Scores       Chance 3 · Customer 3 · Fix effort 1 · Verdict ticket
 Cause        ✎ shop/settings.py:40 → shop/pricing.py:142
 Sequence     1. We delete the upgrade step for old settings files.
              2. An old shop's settings still say currency:, and nothing reads that key any more.
@@ -66,7 +66,7 @@ differences:
 
 ```
 #            D2
-Scores       Rule Manageable · Next change 3 · Fix effort 1 · Verdict ticket
+Scores       Rule Manageable · Next change 3 · Security – · GDPR – · Layers – · Fix effort 1 · Verdict ticket
 Sequence     1. We write the fallback colour for the buttons in three places.
              2. A developer changes it for the chat button.
              3. The send button keeps the old colour, and no test notices.
