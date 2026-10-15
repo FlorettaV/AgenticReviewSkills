@@ -55,8 +55,14 @@ the `mr-review` skill), never as a finding.
   A developer finding's tag carries its `D` number, because the note numbers
   the two halves separately: "tick D1" and "tick 1" are different rows.
   Lines written before tags existed are left as they are.
-- **Numbers continue from the highest in the file** and are never reused.
-  Check before adding: `grep -o '\*\*[RA][0-9]*' review/TODO.md | sort -V | tail`.
+- **Each letter has its own count**, R1, R2, … and A1, A2, …, and numbers
+  are never reused. Find the next one per letter before adding; the `<n>`
+  example lines in the file never match:
+
+  ```
+  grep -o '\*\*R[0-9]\+\*\*' review/TODO.md | tr -dc '0-9\n' | sort -n | tail -1
+  grep -o '\*\*A[0-9]\+\*\*' review/TODO.md | tr -dc '0-9\n' | sort -n | tail -1
+  ```
 - The text follows the title rules in `review-writing`.
 
 ## Parking
