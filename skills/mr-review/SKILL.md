@@ -124,6 +124,29 @@ review and the operator should never have to restate them:
 - **The linter is the command the workspace `CLAUDE.md` gives.** If it gives
   none, find the configured one and say in the note which command you ran.
 
+## Before the review
+
+A few checks, in this order, each one line of output at most, and silent when
+there is nothing to say.
+
+**Notes whose MR is done.** For each note in `review/`, read the head commit
+it reviewed from its header and check whether that MR is merged or closed:
+
+```
+git merge-base --is-ancestor <reviewed head> origin/main   # merged
+git ls-remote --heads origin <branch>                      # empty: the branch is gone
+```
+
+A squash or rebase merge leaves the reviewed commit off `main`; then the code
+host's CLI (`gh pr view`, `glab mr view`) or a branch gone from the server
+tells. When it cannot be told, say nothing. Otherwise offer once:
+
+> Before we start: MR 12 and MR 13 look merged. Delete their review notes? Their
+> log rows stay.
+
+On a yes, `review-followup` ("When an MR is done") does the deleting. Without
+one, nothing is touched.
+
 ## The method
 
 Steps 1–4 and 6–9 are the review itself, the same whichever half was asked
@@ -243,7 +266,8 @@ GDPR or security finding is reviewed directly, not delegated.
 
 A finding that can be demonstrated is worth five that are argued. Write a small
 script in the scratchpad that runs the code in question (in Python: imports the
-module) and prints the behaviour with and without the change.
+module) and prints the behaviour with and without the change. Feed it made-up
+data, never a real customer's, so its output can go into a note as it is.
 `git archive <branch> <path> | tar -x` gives you the branch's code without
 touching the working tree.
 

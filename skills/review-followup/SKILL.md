@@ -82,7 +82,8 @@ your own judgement.
 - Tick the note's row **and** the TODO line.
 - Add the reason to the TODO line, dated: "Operator 2026-10-12: intended; they
   will talk to the author".
-- A ticked row stays where it is. Never delete or move a ticked item.
+- A ticked row stays where it is while its MR is open. Never delete or move a
+  ticked item before then (see "When an MR is done").
 - "Check" on some rows of a reply ticks those rows only.
 
 ## When the last box is ticked
@@ -138,7 +139,8 @@ what was decided, what is served — re-score where everyone can see it:
 
 - Change the row, and show where it came from: `` `–` (was `block`) ``.
 - Add a **Re-scored <date>.** paragraph at the top of the detail block: the
-  new fact, who gave it, and what it changes.
+  new fact, where it came from by role (the operator, the author in an MR
+  comment, the deploy config — never a person's name), and what it changes.
 - Update the TODO line and, if it was the worst row, the review log in
   `review/LOG.md`.
 - If the change leaves something behind (a recheck before merge, a smaller
@@ -156,13 +158,29 @@ cleanup at the end":
   recheck at the end", "Comment cleanup — once, at the end", "Linter — once,
   at the end". Each item names where it came from, which later steps touch the
   same code (a watch list), what "fixed" looks like, and how to recheck it.
-- **A probe that proves it** is copied into `review/probes/`, so it outlives
-  the session's scratchpad. The recheck instructions name it.
+- **A probe that proves it** is copied into `review/probes/mr-<n>/`, so it
+  outlives the session's scratchpad. The recheck instructions name it. It holds
+  made-up data only, and it goes when its MR's note goes.
 - **Not a stack:** a heading of its own in TODO ("Sweep — <topic> — to plan"),
   with the starting points listed.
 
 At each later step of the stack, look at the watch list and write one line
 under the item: "Step 3 checked: not touched".
+
+## When an MR is done
+
+`mr-review` offers, at the start of a review, to clean up notes whose MR looks
+merged or closed. When the operator says yes for an MR, and only then:
+
+- delete its note (`review/mr-<n>-*`) and its probes (`review/probes/mr-<n>/`);
+- delete its ticked R and A lines from `review/TODO.md`, and the MR heading if
+  nothing is left under it. Its **open** A lines stay: they are work still to
+  do somewhere else;
+- keep its row in `review/LOG.md`. That row, the tickets and `ISSUES.md` are
+  the history that stays.
+
+Say in one line what went. A probe that was moved into the plugin as a test
+fixture is no longer in `review/` and is not touched.
 
 ## Pausing
 

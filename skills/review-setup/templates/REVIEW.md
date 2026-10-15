@@ -240,7 +240,6 @@ Reviewed <date>, read-only. Base `<merge-base>`, head `<sha>`.
 |---|---|
 | Commits | `<sha>` <subject>, … |
 | Diff | <n> files, +<a> / −<b> |
-| Author | <name> |
 
 ## What it does
 Two to six neutral sentences. What the author set out to do and how.

@@ -101,6 +101,10 @@ Inside the fence, write the Markdown that GitLab and GitHub both read:
   real lines, no `…` inside, no prose in the block.
 - **Probe output** (what a script printed) is a plain ` ``` ` fence with no
   language, so it is not highlighted as code.
+- **Nothing personal leaves the machine.** A comment is read by everyone with
+  access to the repository, for as long as the MR exists. Before delivering,
+  read the fence once for real personal data in quotes and probe output, and
+  replace it with a placeholder (see `review-writing`).
 
 ## When the operator corrects the premise
 

@@ -118,6 +118,15 @@ Four habits behind it:
 fallback string", used a dozen times as a label, means nothing to the shop
 owner. "The 'We're closed' text the shop owner sets under Opening hours" does.
 
+**Personal data never goes in.** Not in a draft, a note, a TODO line, a probe
+or a comment. The records name roles ("the author", "the operator"), never
+people. Real data a probe or a quote picks up (a customer's e-mail address,
+name, phone number, IBAN) is replaced where it stands by a typed placeholder:
+`<customer email>`, `<customer name>`. When its shape is the point (a `+` in
+an address, an odd domain), use a made-up value of the same shape on a domain
+reserved for examples: `jane+orders@example.com`, `shop.test`. It almost
+never matters at review level which customer it was.
+
 **"We" is the inclusive we.** All of us are responsible for the code and work
 on it together, so it is "we" whoever wrote the change.
 

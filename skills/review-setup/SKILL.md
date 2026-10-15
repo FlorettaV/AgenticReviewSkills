@@ -106,7 +106,8 @@ Fill the templates. Keep every `<…>` the operator did not answer as a visible
   question 5. Leave the scale, the verdicts and the note shape as the template
   has them.
 - **`review/LOG.md`**, **`review/TODO.md`** and **`review/ISSUES.md`** from
-  their templates, with the operator's name where the template asks who ticks.
+  their templates. The records name roles ("the operator", "the author"),
+  never people.
 
 The review skills come with this plugin, so nothing needs copying. If the
 operator wants the whole team on the same workspace, the plugin can be enabled
