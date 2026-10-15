@@ -67,6 +67,13 @@ other later with "now do the customer side too". A skipped half is marked
 and GDPR were not checked. Either half can block: a finding blocks when it names
 what breaks if the MR merges as it stands.
 
+### The A list
+
+Anything Claude notices on the side during a review goes quietly onto the A
+list in `review/TODO.md` instead of interrupting. It is offered once a
+review's findings are all handled, and shown whenever you ask: "show the A
+list".
+
 ## What is shared and what is yours
 
 - **Shared, in this plugin:** the review method, the scoring columns, how a

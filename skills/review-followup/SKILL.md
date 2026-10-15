@@ -91,10 +91,11 @@ When a tick leaves no open row in the note, the review's findings are done.
 Look in `review/TODO.md` for open lines tagged with this review — `(MR <n>)`
 and `(zoom-in MR <n> …)` — that are not the note's own findings.
 
-If there are any, ask once, in one line:
+If there are any, ask once, in one line, and say in half a sentence what the
+list is, because the operator may never have seen it:
 
-> All findings on MR 13 are handled. This review also parked 4 other items —
-> go through them now?
+> All findings on MR 13 are handled. While reviewing, I parked 4 other things
+> I noticed on the side (the A list in `review/TODO.md`) — go through them now?
 
 If there are none, say only that the findings are all handled.
 
@@ -111,6 +112,24 @@ in one or two sentences, and offer the four choices:
 Wait for the answer before showing the next item. When the list is done, say
 how many went each way, in one line. If the operator stops halfway, the
 remaining lines simply stay open.
+
+## Showing the list
+
+The A list keeps a review on track: what is noticed on the side waits there
+instead of interrupting. It is never shown during the work. The operator hears
+about it twice, at set moments (once at setup, once when a review's last box is
+ticked), and sees it whenever they ask: "show the A list", "what's parked",
+"show the open items".
+
+Show it as a table, one row per line, with what it is next to every number:
+
+| # | Status | From | What |
+|---|---|---|---|
+| A11 | open | zoom-in MR 13 #2 | Read-only in layers: avoid, detect, deny |
+
+By default the open A lines; "all" adds the ticked ones, "the sweep" only the
+lines under a "Sweep — … — to plan" heading, "R" the review findings. Skip the
+`<n>` example lines at the top of the file.
 
 ## Re-scoring in the open
 

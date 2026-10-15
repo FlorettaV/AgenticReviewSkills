@@ -118,7 +118,11 @@ Answer in a few lines:
 - the files written, with paths;
 - every `TODO:` left open, one line each;
 - that the scale and verdicts are a starting point: when a review shows one
-  is wrong, say so and it gets rewritten in `REVIEW.md`.
+  is wrong, say so and it gets rewritten in `REVIEW.md`;
+- the A list, in one sentence, because it is never shown during a review:
+  "Anything I notice on the side goes quietly onto the A list in
+  `review/TODO.md`, so a review stays on track; say 'show the A list' whenever
+  you like."
 
 Then print the rules block from the new `CLAUDE.md`, with `review-setup` as
 what loaded it, so the operator sees the rules exactly as the review skills

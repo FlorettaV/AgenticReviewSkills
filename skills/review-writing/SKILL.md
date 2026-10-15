@@ -261,6 +261,12 @@ The note is complete. The reply is short.
   earlier conclusions unless asked.
 - **One thing at a time.** Answer the item asked. Anything else that surfaced
   goes into `review/TODO.md` silently (see `review-followup`).
+- **Never a bare item number.** Parking is silent, so the operator has never
+  seen most TODO items. Every item number in a reply carries what it is, in a
+  few words, at least the first time in that reply: "A11 (read-only in
+  layers)", not "A11". Three or more numbers become a small table of number
+  and title. A finding's number from the note is enough on its own only while
+  that note is the one being discussed.
 - **When the operator paraphrases a finding back**, correct only what would
   change what they do. A wrong noun that leads to the wrong fix is worth
   correcting. A loose word that still lands on the right conclusion is not.
