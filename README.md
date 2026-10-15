@@ -29,28 +29,30 @@ claude plugin update review@review-skills
 Auto-update is off for team marketplaces. Turn it on in `/plugin` →
 **Marketplaces** if you want it.
 
-### Or from a local copy
-
-If this repo is cloned into the review workspace, say
-`~/projects/new_project/review-skills/` next to `project_codebase/`, start
-Claude in `new_project/` and say:
-
-> Install the review plugin from ./review-skills
-
-Claude runs `claude plugin marketplace add ./review-skills` and
-`claude plugin install review@review-skills`. Start a new session so the
-skills load, then go on with "First use" below.
+Install it once, for your user. Every project then gets the same skills, and
+an update reaches all of them at once. What differs per project lives in that
+project's `review/REVIEW.md`, never in an edited copy of the skills.
 
 ## First use
 
-Make a folder for the review workspace, next to the project's repository (not
-inside it, so review notes never end up in a commit). Start Claude there and
-say:
+Make a folder for the review workspace, clone the project into it, and start
+Claude in the workspace folder:
 
-> set up reviews for ../my-project
+```
+~/projects/my-project/          the workspace: start Claude here
+  my-project/                   the project, cloned under its own name
+```
+
+The workspace itself is not a git repository, so review notes never end up in
+a commit, and the project sits below the folder Claude starts in, so reading
+it needs no permission prompts. Then say:
+
+> set up reviews for ./my-project
 
 `review-setup` asks a handful of questions and writes the workspace
-`CLAUDE.md` and a `review/` folder. Then: "review MR 12" or "review feat/x".
+`CLAUDE.md`, its `.claude/settings.json` and a `review/` folder. Before every
+review, fetch the project (`git -C my-project fetch`); then say "review MR 12"
+or "review feat/x".
 
 A review runs both halves by default:
 
@@ -88,6 +90,19 @@ list".
 
 `git` with the project's remote branches fetched, and `python3` for the note
 checker.
+
+## Working on the plugin itself
+
+Clone this repository anywhere, make the change on a branch, and try it in a
+session that loads the plugin straight from your working tree:
+
+```bash
+claude --plugin-dir ~/projects/review-skills
+```
+
+Review the change with the installed, released version, from a workspace that
+has a clone of this repository as its project: the released skills review the
+new ones.
 
 ## Releasing a change to the plugin
 

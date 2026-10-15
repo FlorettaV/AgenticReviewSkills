@@ -20,7 +20,10 @@ review/                       the review records
   LOG.md                      one row per review, newest first
   ISSUES.md                   pre-existing weaknesses a review bumped into
   TODO.md                     open items. R = review found, A = additional
+  RULES.md                    the operator's own rules, if given at setup
   mr-<n>-<branch-slug>.md     one note per merge request
+  <stack>-stack-plan.md       one per stack of branches
+  probes/mr-<n>/              probe scripts kept for an MR, made-up data only
 
 .claude/settings.json         deny rules: no edits under <project>/, no git
                               writes. For sessions started in this folder only

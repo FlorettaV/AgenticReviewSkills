@@ -25,6 +25,32 @@ Fill in what loaded it and the two environment lines from the workspace
   • Anything noticed on the side goes onto the A list, silently.
 ```
 
+## 0. Where Claude runs
+
+Every review skill except `review-setup` starts by checking that Claude was
+started in a review workspace: the start folder holds a `CLAUDE.md` and a
+`review/` folder. If not (most often because Claude was started inside the
+project), stop before anything else: "This is not a review workspace. Start
+Claude one level up, in the folder that holds `review/`." Claude Code asks
+permission for anything above or beside the folder it starts in, so the
+project has to sit below it. The one layout:
+
+```
+~/projects/<name>/             the workspace: start Claude here. Not a git repository
+  CLAUDE.md                    the environment: commands, code host, branch
+  .claude/settings.json        deny rules, for sessions started here only
+  <project>/                   the project, cloned under its own name. Read-only
+  review/
+    REVIEW.md                  how we review this project. Read first, every time
+    LOG.md                     one row per review, newest first
+    TODO.md                    open items: R = review found, A = additional
+    ISSUES.md                  pre-existing weaknesses a review bumped into
+    RULES.md                   the operator's own rules, if given at setup
+    mr-<n>-<branch-slug>.md    one note per merge request
+    <stack>-stack-plan.md      one per stack of branches
+    probes/mr-<n>/             probe scripts kept for an MR, made-up data only
+```
+
 ## 1. The project is read-only
 
 No file in the project folder is created, changed or deleted, however small or

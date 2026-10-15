@@ -16,25 +16,41 @@ Templates are in `${CLAUDE_SKILL_DIR}/templates/`.
 
 ## The shape it builds
 
+One layout, the same in every project (also in `reference/rules.md` §0):
+
 ```
-<workspace>/
-  CLAUDE.md            the environment only: commands, code host, branch
-  .claude/settings.json  deny rules for sessions started here
-  <project>/           the code under review. Read-only to every review skill
+~/projects/<name>/             the workspace: start Claude here. Not a git repository
+  CLAUDE.md                    the environment: commands, code host, branch
+  .claude/settings.json        deny rules, for sessions started here only
+  <project>/                   the project, cloned under its own name. Read-only
   review/
-    REVIEW.md          the review standard. Starts small and grows
-    LOG.md             one row per review, newest first
-    TODO.md            open items, R and A numbered
-    ISSUES.md          pre-existing weaknesses
+    REVIEW.md                  how we review this project. Read first, every time
+    LOG.md                     one row per review, newest first
+    TODO.md                    open items: R = review found, A = additional
+    ISSUES.md                  pre-existing weaknesses a review bumped into
+    RULES.md                   the operator's own rules, if given at setup
+    mr-<n>-<branch-slug>.md    one note per merge request
+    <stack>-stack-plan.md      one per stack of branches
+    probes/mr-<n>/             probe scripts kept for an MR, made-up data only
 ```
 
-`review/` lives **outside** the project's repository, so review notes never end
-up in a commit. **The workspace itself is never a git repository.** It holds
-the project, `review/` and, if cloned there, the plugin, side by side. Check
-with `git -C <workspace> rev-parse --show-toplevel`. If that answers, the
-workspace is inside a repository: say so, propose a plain folder instead
-(`~/projects/<name>/`, with the project cloned into it), and ask before
-creating anything.
+Only `CLAUDE.md`, `.claude/settings.json`, `REVIEW.md`, `LOG.md`, `TODO.md` and
+`ISSUES.md` are written at setup; the rest appears as reviews need it.
+
+**Check the shape before writing anything.** The start folder is the
+workspace:
+
+- It is **not inside a git repository**
+  (`git -C <workspace> rev-parse --show-toplevel` says nothing), so review
+  notes never end up in a commit.
+- It holds **exactly one project repository**, below it. Claude Code asks
+  permission for anything above or beside the folder it starts in, so a project
+  next to the workspace (`../my-project`) does not work.
+- The plugin is installed globally, so there is no copy of it in the workspace.
+
+If the shape is different, say what is off in one line, propose the layout
+(`~/projects/<name>/` with the project cloned into it), and ask before moving
+or creating anything.
 
 ## While setting up
 

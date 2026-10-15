@@ -76,27 +76,14 @@ it does not repeat.
 
 ## The workspace
 
-A review workspace has two folders side by side:
-
-- **The project folder**, the code under review. Read-only.
-- **`review/`**, where the review lives. Writable.
+One layout, the same everywhere (rules §0): the workspace folder, with the
+project inside it under its own name, `review/` next to it, and Claude started
+in the workspace.
 
 The workspace `CLAUDE.md` names the project folder and says what this
 environment has and lacks: the linter command, whether tests may be run, the
 code host and its CLI, the default branch. Read it rather than assuming. Where
 this skill writes `origin/main`, it means the remote's default branch.
-
-`review/` holds:
-
-```
-REVIEW.md                 the project's review standard. Read first, every time
-LOG.md                    one row per review, newest first
-ISSUES.md                 pre-existing weaknesses a review bumped into
-TODO.md                   open items — R = review found, A = additional
-<stack>-stack-plan.md     one per stack of branches
-probes/                   probe scripts worth keeping past the session
-mr-<n>-<branch-slug>.md   one note per merge request
-```
 
 `REVIEW.md` lists the project's own rule documents (coding rules, conventions,
 glossary, repo rules). Read the ones it names before judging any code.
