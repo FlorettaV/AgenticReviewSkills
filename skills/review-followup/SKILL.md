@@ -1,6 +1,6 @@
 ---
 name: review-followup
-description: Keep the review records straight after a review note exists — tick rows, re-score a finding the operator corrected, park items, carry items to the end of a stack, walk through the parked items once a review's findings are all handled, and keep the note, review/TODO.md, the stack plan and the review log in REVIEW.md saying the same thing. Use this whenever the operator responds to findings already written down ("1 is intended, check", "tick 2 and 3", "I'll talk to them", "we decided to remove it", "note this for the end", "keep this for a recheck", "mark a cleanup on these at the end", "let's wait here", "let's go through the other finds"), and whenever a finding's premise changes after the note was written. Writes only in review/; never edits the project, never runs git writes, never runs tests unless the workspace allows it.
+description: Keep the review records straight after a review note exists — tick rows, re-score a finding the operator corrected, park items, carry items to the end of a stack, walk through the parked items once a review's findings are all handled, and keep the note, review/TODO.md, the stack plan and the review log in review/LOG.md saying the same thing. Use this whenever the operator responds to findings already written down ("1 is intended, check", "tick 2 and 3", "D1 is fine", "I'll talk to them", "we decided to remove it", "note this for the end", "keep this for a recheck", "mark a cleanup on these at the end", "let's wait here", "let's go through the other finds"), and whenever a finding's premise changes after the note was written. Writes only in review/; never edits the project, never runs git writes, never runs tests unless the workspace allows it.
 ---
 
 # After the note: keeping the records straight
@@ -15,13 +15,10 @@ paragraph — follows the `review-writing` skill.
 
 ## Standing constraints
 
-**First, print the rules block** from the workspace `CLAUDE.md`, with
-`review-followup` as what loaded it. If the workspace has no rules block, say
-so in one line and carry on.
-
-Writes only in `review/`. Read-only over the project folder, no git writes,
-tests only if the workspace `CLAUDE.md` allows them — the rules hold here
-exactly as in a review.
+**First, load and print the rules**: read
+`${CLAUDE_PLUGIN_ROOT}/reference/rules.md` and print its block, with
+`review-followup` as what loaded it. They hold here exactly as in a review.
+This skill writes only in `review/`.
 
 ## Where each finding lives
 
@@ -30,10 +27,10 @@ them in the same step.
 
 | Place | What it holds |
 |---|---|
-| The note, `review/mr-<n>-<branch>.md` | The finding's row (✓ box, scores, verdict) and its detail block |
+| The note's data file, `review/mr-<n>-<branch>.toml` | The finding itself: ticked, scores, verdict, text and draft. The `.md` next to it is rendered from this file, never edited by hand |
 | `review/TODO.md` | One `R` line per finding, under the MR's heading |
 | The stack plan, `review/<stack>-stack-plan.md` | For a stack: the step's row, items carried to the end, watch lists |
-| The review log in `review/REVIEW.md` | One log row per review: the worst row and its verdict |
+| The review log, `review/LOG.md` | One row per review: the worst row and its verdict |
 
 Pre-existing weaknesses go to `review/ISSUES.md` instead (the revert test in
 the `mr-review` skill), never as a finding.
@@ -42,6 +39,7 @@ the `mr-review` skill), never as a finding.
 
 ```
 - [ ] **R12** (MR 13) <title, word for word from the note>
+- [ ] **R13** (MR 13 D1) <a developer finding's title, word for word>
 - [ ] **A40** (MR 13) <something noticed while reviewing MR 13>
 - [ ] **A41** (zoom-in MR 13 #2) <something noticed while explaining finding 2>
 - [ ] **A42** (–) <something noticed outside any review>
@@ -51,9 +49,17 @@ the `mr-review` skill), never as a finding.
   noticed while doing something else.
 - **The tag in brackets is where it came from.** It is what lets the
   walk-through below find a review's parked items. Every new line gets one.
+  A developer finding's tag carries its `D` number, because the note numbers
+  the two halves separately: "tick D1" and "tick 1" are different rows.
   Lines written before tags existed are left as they are.
-- **Numbers continue from the highest in the file** and are never reused.
-  Check before adding: `grep -o '\*\*[RA][0-9]*' review/TODO.md | sort -V | tail`.
+- **Each letter has its own count**, R1, R2, … and A1, A2, …, and numbers
+  are never reused. Find the next one per letter before adding; the `<n>`
+  example lines in the file never match:
+
+  ```
+  grep -o '\*\*R[0-9]\+\*\*' review/TODO.md | tr -dc '0-9\n' | sort -n | tail -1
+  grep -o '\*\*A[0-9]\+\*\*' review/TODO.md | tr -dc '0-9\n' | sort -n | tail -1
+  ```
 - The text follows the title rules in `review-writing`.
 
 ## Parking
@@ -70,10 +76,12 @@ it is understood, intended, ticketed, will be talked about, or fixed — "1 is
 intended, check", "I can see the replacement ticket, check". Do not tick on
 your own judgement.
 
-- Tick the note's row **and** the TODO line.
+- Set `ticked = true` on the finding in the note's data file, **and** tick the
+  TODO line.
 - Add the reason to the TODO line, dated: "Operator 2026-10-12: intended; they
   will talk to the author".
-- A ticked row stays where it is. Never delete or move a ticked item.
+- A ticked row stays where it is while its MR is open. Never delete or move a
+  ticked item before then (see "When an MR is done").
 - "Check" on some rows of a reply ticks those rows only.
 
 ## When the last box is ticked
@@ -82,10 +90,11 @@ When a tick leaves no open row in the note, the review's findings are done.
 Look in `review/TODO.md` for open lines tagged with this review — `(MR <n>)`
 and `(zoom-in MR <n> …)` — that are not the note's own findings.
 
-If there are any, ask once, in one line:
+If there are any, ask once, in one line, and say in half a sentence what the
+list is, because the operator may never have seen it:
 
-> All findings on MR 13 are handled. This review also parked 4 other items —
-> go through them now?
+> All findings on MR 13 are handled. While reviewing, I parked 4 other things
+> I noticed on the side (the A list in `review/TODO.md`) — go through them now?
 
 If there are none, say only that the findings are all handled.
 
@@ -103,16 +112,38 @@ Wait for the answer before showing the next item. When the list is done, say
 how many went each way, in one line. If the operator stops halfway, the
 remaining lines simply stay open.
 
+## Showing the list
+
+The A list keeps a review on track: what is noticed on the side waits there
+instead of interrupting. It is never shown during the work. The operator hears
+about it twice, at set moments (once at setup, once when a review's last box is
+ticked), and sees it whenever they ask: "show the A list", "what's parked",
+"show the open items".
+
+Show it as a table, one row per line, with what it is next to every number:
+
+| # | Status | From | What |
+|---|---|---|---|
+| A11 | open | zoom-in MR 13 #2 | Read-only in layers: avoid, detect, deny |
+
+By default the open A lines; "all" adds the ticked ones, "the sweep" only the
+lines under a "Sweep — … — to plan" heading, "R" the review findings. Skip the
+`<n>` example lines at the top of the file.
+
 ## Re-scoring in the open
 
 When the operator supplies a fact that changes a score — what is deployed,
 what was decided, what is served — re-score where everyone can see it:
 
-- Change the row, and show where it came from: `` `–` (was `block`) ``.
-- Add a **Re-scored <date>.** paragraph at the top of the detail block: the
-  new fact, who gave it, and what it changes.
+- Change the score in the data file, and keep the old value under the
+  finding's `[finding.was]` (`verdict = "block"`): the note then shows
+  `– (was block)`.
+- Write a **Re-scored <date>.** paragraph into the finding's `rescored` field,
+  which the note shows at the top of the detail block: the
+  new fact, where it came from by role (the operator, the author in an MR
+  comment, the deploy config — never a person's name), and what it changes.
 - Update the TODO line and, if it was the worst row, the review log in
-  REVIEW.md.
+  `review/LOG.md`.
 - If the change leaves something behind (a recheck before merge, a smaller
   finding), say so in the same paragraph.
 
@@ -128,13 +159,29 @@ cleanup at the end":
   recheck at the end", "Comment cleanup — once, at the end", "Linter — once,
   at the end". Each item names where it came from, which later steps touch the
   same code (a watch list), what "fixed" looks like, and how to recheck it.
-- **A probe that proves it** is copied into `review/probes/`, so it outlives
-  the session's scratchpad. The recheck instructions name it.
+- **A probe that proves it** is copied into `review/probes/mr-<n>/`, so it
+  outlives the session's scratchpad. The recheck instructions name it. It holds
+  made-up data only, and it goes when its MR's note goes.
 - **Not a stack:** a heading of its own in TODO ("Sweep — <topic> — to plan"),
   with the starting points listed.
 
 At each later step of the stack, look at the watch list and write one line
 under the item: "Step 3 checked: not touched".
+
+## When an MR is done
+
+`mr-review` offers, at the start of a review, to clean up notes whose MR looks
+merged or closed. When the operator says yes for an MR, and only then:
+
+- delete its note (`review/mr-<n>-*`) and its probes (`review/probes/mr-<n>/`);
+- delete its ticked R and A lines from `review/TODO.md`, and the MR heading if
+  nothing is left under it. Its **open** A lines stay: they are work still to
+  do somewhere else;
+- keep its row in `review/LOG.md`. That row, the tickets and `ISSUES.md` are
+  the history that stays.
+
+Say in one line what went. A probe that was moved into the plugin as a test
+fixture is no longer in `review/` and is not touched.
 
 ## Pausing
 
@@ -151,11 +198,11 @@ line in TODO.
 
 ## Before you answer
 
-Re-read every place you touched and check they agree: the ✓ box, the verdict,
-the TODO line, the plan, the log row. Then run the note checker:
+Re-read every place you touched and check they agree: the data file, the TODO
+line, the plan, the log row. Then check the data file and render the note:
 
 ```
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/review-writing/check_note.py review/<the note>.md
+python3 -B ${CLAUDE_PLUGIN_ROOT}/scripts/note.py render review/<the note>.toml
 ```
 
 Answer in a few lines: what changed, where. No recap of findings that did not

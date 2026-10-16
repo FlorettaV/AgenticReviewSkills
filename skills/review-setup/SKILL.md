@@ -1,6 +1,6 @@
 ---
 name: review-setup
-description: Set up a review workspace for a new project so the review skills can run there — find the project folder, its agent rules, how to run tests and the linter, where the architecture is described, then write the workspace CLAUDE.md and seed review/ (REVIEW.md, TODO.md, ISSUES.md). Use this when the operator wants to start reviewing a project that has no review/ folder yet ("set up reviews for this repo", "install the review skills here", "can we review project X the way we review the others"), and when a review skill finds no review/REVIEW.md.
+description: Set up a review workspace for a new project so the review skills can run there — find the project folder, its agent rules, how to run tests and the linter, where the architecture is described, then write the workspace CLAUDE.md and seed review/ (REVIEW.md, LOG.md, TODO.md, ISSUES.md). Use this when the operator wants to start reviewing a project that has no review/ folder yet ("set up reviews for this repo", "install the review skills here", "can we review project X the way we review the others"), and when a review skill finds no review/REVIEW.md.
 ---
 
 # Setting up a review workspace
@@ -16,30 +16,52 @@ Templates are in `${CLAUDE_SKILL_DIR}/templates/`.
 
 ## The shape it builds
 
+One layout, the same in every project (also in `reference/rules.md` §0):
+
 ```
-<workspace>/
-  CLAUDE.md            the environment and the rules block
-  <project>/           the code under review. Read-only to every review skill
+~/projects/<name>/             the workspace: start Claude here. Not a git repository
+  CLAUDE.md                    the environment: commands, code host, branch
+  .claude/settings.json        deny rules, for sessions started here only
+  <project>/                   the project, cloned under its own name. Read-only
   review/
-    REVIEW.md          the review standard. Starts small and grows
-    TODO.md            open items, R and A numbered
-    ISSUES.md          pre-existing weaknesses
+    REVIEW.md                  how we review this project. Read first, every time
+    LOG.md                     one row per review, newest first
+    TODO.md                    open items: R = review found, A = additional
+    ISSUES.md                  pre-existing weaknesses a review bumped into
+    RULES.md                   the operator's own rules, if given at setup
+    mr-<n>-<branch-slug>.toml  one note per merge request: the data, which skills
+                               read and write
+    mr-<n>-<branch-slug>.md    the same note, rendered from it for people
+    <stack>-stack-plan.md      one per stack of branches
+    probes/mr-<n>/             probe scripts kept for an MR, made-up data only
 ```
 
-`review/` lives **outside** the project's repository, so review notes never end
-up in a commit. **The workspace itself is never a git repository.** It holds
-the project, `review/` and, if cloned there, the plugin, side by side. Check
-with `git -C <workspace> rev-parse --show-toplevel`. If that answers, the
-workspace is inside a repository: say so, propose a plain folder instead
-(`~/projects/<name>/`, with the project cloned into it), and ask before
-creating anything.
+Only `CLAUDE.md`, `.claude/settings.json`, `REVIEW.md`, `LOG.md`, `TODO.md` and
+`ISSUES.md` are written at setup; the rest appears as reviews need it.
+
+**Check the shape before writing anything.** The start folder is the
+workspace:
+
+- It is **not inside a git repository**
+  (`git -C <workspace> rev-parse --show-toplevel` says nothing), so review
+  notes never end up in a commit.
+- It holds **exactly one project repository**, below it. Claude Code asks
+  permission for anything above or beside the folder it starts in, so a project
+  next to the workspace (`../my-project`) does not work.
+- The plugin is installed globally, so there is no copy of it in the workspace.
+
+If the shape is different, say what is off in one line, propose the layout
+(`~/projects/<name>/` with the project cloned into it), and ask before moving
+or creating anything.
 
 ## While setting up
 
-The project folder is read-only from the first step. This skill writes only the
-workspace `CLAUDE.md` and files in `review/`. No git writes. Do not run the
-tests or the linter to find out whether they work — ask, and record what the
-operator says.
+**First, load and print the rules**: read
+`${CLAUDE_PLUGIN_ROOT}/reference/rules.md` and print its block, with
+`review-setup` as what loaded it. The project folder is read-only from the
+first step. This skill writes only the workspace `CLAUDE.md`, the workspace's
+`.claude/settings.json` and files in `review/`. Do not run the tests or the
+linter to find out whether they work — ask, and record what the operator says.
 
 If the workspace already has a `CLAUDE.md` or a `review/` folder, read them
 first. Add what is missing and show the operator the difference. Never
@@ -63,7 +85,7 @@ confirm instead of a blank. Read-only commands only:
 - **Architecture docs:** `ARCHITECTURE.md`, `docs/architecture*`, `docs/adr/`,
   diagrams (`*.pdf`, `*.drawio`, `*.mmd`), an import-guard or layering test.
 - **Tools on this machine:** `python3`, `uv`/`uvx`, `node`. The note checker
-  needs `python3`.
+  and renderer need `python3` 3.11 or newer (`python3 -c 'import tomllib'`).
 
 ## 2. Ask, in one message
 
@@ -96,15 +118,24 @@ for word, and listed in `REVIEW.md` like any other rule doc.
 Fill the templates. Keep every `<…>` the operator did not answer as a visible
 `TODO:` line, never as an invented value.
 
-- **`CLAUDE.md`** from `templates/CLAUDE.md`. The rules block must say exactly
-  what question 3 and 4 answered: "Never run the test suite" when tests are
-  off, or the command when they are on.
+- **`CLAUDE.md`** from `templates/CLAUDE.md`: the environment only, no rules.
+  Its Tests and Linter lines say exactly what questions 3 and 4 answered
+  (never run, with the command for the operator; may be run, with the command;
+  or no test suite), because the rules block prints them.
+- **`.claude/settings.json`** in the workspace, from `templates/settings.json`,
+  with `<project>` replaced by the project folder's name. Never in the user's
+  settings: the deny rules must hold only for sessions started in this
+  workspace. If the workspace already has one, add the deny rules to it and
+  show the difference.
 - **`review/REVIEW.md`** from `templates/REVIEW.md`. Fill §1 from the
-  environment, the rule-doc list from question 2, §3 from question 6, §4 from
-  question 5. Leave the scale, the verdicts and the note shape as the template
-  has them.
-- **`review/TODO.md`** and **`review/ISSUES.md`** from their templates, with
-  the operator's name where the template asks who ticks.
+  environment, the rule-doc list from question 2, §3 from question 6 (each
+  area with a short name in bold, as the §2 rules have), §4 from
+  question 5, §5 from question 6 (who meets the effect, what is live, whether
+  there is personal data). The columns, scales, verdicts and note shape are
+  not in it: they come with the plugin. Keep its format stamp on line 1.
+- **`review/LOG.md`**, **`review/TODO.md`** and **`review/ISSUES.md`** from
+  their templates. The records name roles ("the operator", "the author"),
+  never people.
 
 The review skills come with this plugin, so nothing needs copying. If the
 operator wants the whole team on the same workspace, the plugin can be enabled
@@ -117,8 +148,11 @@ Answer in a few lines:
 - the files written, with paths;
 - every `TODO:` left open, one line each;
 - that the scale and verdicts are a starting point: when a review shows one
-  is wrong, say so and it gets rewritten in `REVIEW.md`.
+  is wrong, say so and it gets rewritten in `REVIEW.md`;
+- the A list, in one sentence, because it is never shown during a review:
+  "Anything I notice on the side goes quietly onto the A list in
+  `review/TODO.md`, so a review stays on track; say 'show the A list' whenever
+  you like."
 
-Then print the rules block from the new `CLAUDE.md`, with `review-setup` as
-what loaded it, so the operator sees the rules exactly as the review skills
-will print them.
+Then print the rules block again, now with the new environment lines filled in,
+so the operator sees it exactly as the review skills will print it.

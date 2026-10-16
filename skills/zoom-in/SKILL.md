@@ -1,6 +1,6 @@
 ---
 name: zoom-in
-description: Explain one finding, bug or defect in depth as What happens / Why / Fix, with verified file:line citations, ready to paste into an MR comment. Use this whenever the operator points at a single item and wants it opened up — "zoom in on 3", "explain finding 2", "what's actually wrong with this one", "why does that happen" — and whenever a defect needs explaining well enough that someone else can act on it. Covers one item only; other findings stay parked.
+description: Explain one finding, bug or defect in depth as What happens / Why / Fix, with verified file:line citations, ready to paste into an MR comment. Use this whenever the operator points at a single item and wants it opened up — "zoom in on 3", "zoom in on D2", "explain finding 2", "what's actually wrong with this one", "why does that happen" — and whenever a defect needs explaining well enough that someone else can act on it. Covers one item only; other findings stay parked.
 ---
 
 # Zooming in on one finding
@@ -9,31 +9,38 @@ One finding, opened up: its score row, then its title and What happens / Why /
 Fix. **Load the `review-writing` skill** (`review:review-writing`) — it owns the shape and every rule
 about wording. This skill owns the evidence and the paste format.
 
+The finding can come from either half of the note. A customer finding (`3`)
+carries the customer score row; a developer finding (`D2`) carries its own
+(Rule, Next change, Security, GDPR, Layers, Fix effort, Verdict), and its
+What happens follows the
+next developer, as `review-writing` describes.
+
 ## Constraints while you do it
 
-**First, print the rules block** from the workspace `CLAUDE.md`, with
-`zoom-in` as what loaded it. The operator uses it to see the rules were
-re-read, so it comes before any other output. If the workspace has no rules
-block, say so in one line and carry on.
+**First, load and print the rules**: read
+`${CLAUDE_PLUGIN_ROOT}/reference/rules.md` and print its block, with `zoom-in`
+as what loaded it, before any other output. They hold here exactly as in a
+review: however obvious the fix is, it goes in the **Fix** section, not the
+tree; probes follow rules §4.
 
-Read-only over the project folder — no edits, however obvious the fix is; it
-goes in the **Fix** section, not the tree. No git writes (`log`, `diff`, `show`,
-`grep`, `archive` are all fine). Tests run only if the workspace `CLAUDE.md`
-allows it; if it forbids them or says nothing, run none, not even one.
-`review/` is writable, and the scratchpad is where probe scripts go.
-
-`review/REVIEW.md` says how each score column is scored and holds the scale;
-read it rather than assuming, because it changes.
+The columns, default scales and verdicts are in
+`${CLAUDE_PLUGIN_ROOT}/reference/scoring.md`; `review/REVIEW.md` §5 says how
+they are scored in this project. Read both rather than assuming: §5 changes.
+A note in an older format (no `.toml`) can be explained, not updated.
 
 ## The steps
 
-1. **Start from the draft.** If the finding is in a note, rebuild its draft (the
-   shape is in `review-writing`) from the note and the branch. If it is new — a
-   bug the operator points at — fill the draft from scratch.
+1. **Start from the draft.** If the finding is in a note, its draft is in the
+   note's data file, under the finding's `[finding.draft]`. If it is new — a
+   bug the operator points at — fill the draft from scratch (the shape is in
+   `review-writing`).
 2. **Verify the evidence** (below). Every line in Mechanism is printed on the
    branch before it is quoted.
 3. **Write** title, What happens, Why and Fix from the draft.
-4. **Run the editor pass** from `review-writing` on the title and What happens.
+4. **Run the editor pass** from `review-writing` on the title and What happens,
+   unless both are word for word what the data file already holds: that text
+   has had its editor pass. A new fact that changes either one means a new
+   pass.
 5. **Deliver** in the paste format (below).
 
 ## Verify before you publish
@@ -49,9 +56,10 @@ Line numbers are on the branch, never on main. `git grep` returns every hit,
 and the first is often the wrong one — print them all and pick deliberately.
 
 Where the claim is about behaviour rather than structure, prove it. A short
-script that runs the code in question (in Python: imports the module) and
-prints the outcome with and without the change turns an argument into a fact,
-and it is not the test suite. Two lines of real output beat three paragraphs of
+script that runs the code in question and prints the outcome with and without
+the change turns an argument into a fact, and it is not the test suite. Run it
+as rules §4 says: in the scratchpad, `python3 -B`, made-up data, no writes into
+the project. Two lines of real output beat three paragraphs of
 reasoning:
 
 ```
@@ -95,6 +103,10 @@ Inside the fence, write the Markdown that GitLab and GitHub both read:
   real lines, no `…` inside, no prose in the block.
 - **Probe output** (what a script printed) is a plain ` ``` ` fence with no
   language, so it is not highlighted as code.
+- **Nothing personal leaves the machine.** A comment is read by everyone with
+  access to the repository, for as long as the MR exists. Before delivering,
+  read the fence once for real personal data in quotes and probe output, and
+  replace it with a placeholder (see `review-writing`).
 
 ## When the operator corrects the premise
 

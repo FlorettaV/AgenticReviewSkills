@@ -1,0 +1,96 @@
+# A made-up review of a made-up shop, used to test the checker and the renderer.
+format = 2
+
+[mr]
+number = 13
+branch = "feat/currencies"
+reviewed = "2026-10-16"
+base = "1a2b3c4"
+head = "5d6e7f8"
+halves = ["customer", "developer"]
+commits = ["5d6e7f8 Support several currencies per shop", "9a8b7c6 Remove the old settings upgrade"]
+diff = "6 files, +142 / −58"
+what_it_does = '''
+A shop can now sell in several currencies. The settings key `currency:` becomes
+a list under `currencies:`, and the step that upgraded old settings files is
+removed.'''
+verified = "Prices on the checkout page are rounded as before."
+architecture = "Against §4: the pricing module still reads settings only through the settings service."
+interaction = "None open."
+disposition = '''
+Finding 1 blocks: an old shop starts without prices. D2 is a ticket.'''
+readonly_check = "Nothing changed in the project."
+commands = ["make test", "ruff check --no-cache ."]
+
+[rules_walked]
+Readable = "nothing"
+Manageable = "D2"
+Linter = "nothing"
+Architecture = "nothing"
+Tested = "D2"
+Payments = "nothing"
+
+[[finding]]
+id = "1"
+title = "We remove the upgrade step for old shops. An old shop then starts without prices"
+ticked = false
+chance = 4
+customer = 4
+fix_effort = 1
+verdict = "block"
+cause = "✎ `shop/settings.py:40` → `shop/pricing.py:142`"
+what_happens = '''
+We remove the step that upgraded old settings files. An old shop's settings
+still say `currency:`, and nothing reads that key any more. The shop starts
+without prices, and every product page shows "price on request".'''
+why = '''
+✎ `shop/settings.py:40` drops the upgrade; → `shop/pricing.py:142` reads only
+`currencies:`.'''
+fix = "Keep the upgrade step for one more release."
+justify = '''
+Chance 4: every shop installed before version 2 still has the old key.
+Customer 4: no product can be bought.'''
+
+[finding.draft]
+sequence = ["We delete the upgrade step for old settings files.",
+            "An old shop's settings still say currency:, and nothing reads that key any more.",
+            "The shop starts without prices."]
+who_sees_it = "every visitor of a shop installed before version 2"
+must_keep = ["only shops installed before version 2"]
+
+[[finding]]
+id = "D2"
+title = "We write the fallback currency in three places. The next developer changes one"
+ticked = true
+rule = "Manageable"
+next_change = 3
+security = "–"
+gdpr = "–"
+layers = "–"
+chance = 1
+customer = 2
+fix_effort = 1
+verdict = "ticket"
+cause = "✎ `shop/settings.py:12`, `shop/pricing.py:9`, `shop/feed.py:30`"
+rescored = '''
+**Re-scored 2026-10-16.** The operator confirmed the product feed runs for
+every shop, so the customer half adds Chance and Customer here.'''
+what_happens = '''
+We write the fallback currency in three places. A developer changes it for the
+checkout. The product feed keeps the old one, and no test notices. A customer
+can then see two currencies for one product, once a day.'''
+why = '''
+✎ `shop/settings.py:12`, ✎ `shop/pricing.py:9` and ✎ `shop/feed.py:30` each
+hold `"EUR"`.'''
+fix = "Read the fallback from the settings service in all three places."
+justify = "Next change 3: nothing ties the three places together."
+
+[finding.was]
+verdict = "talk"
+
+[finding.draft]
+sequence = ["We write the fallback currency in three places.",
+            "A developer changes it for the checkout.",
+            "The product feed keeps the old one, and no test notices."]
+who_sees_it = "the next developer who changes the fallback currency"
+must_keep = ["the feed runs once a day"]

@@ -22,25 +22,41 @@ Writing happens in three steps, always in this order:
 Keeping the facts apart from the wording means the editor can change every
 sentence without changing a single fact.
 
+Both live in the note's data file, `review/mr-<n>-<branch-slug>.toml`: the
+draft under each finding's `[finding.draft]`, the written text in its fields
+(`title`, `what_happens`, `why`, `fix`, `justify`). The Markdown note people
+read is rendered from that file by `scripts/note.py` and never written by hand;
+the shape of a finding's block, its small score table and the ⚠️/❗ markers
+come from the renderer. `mr-review` says how the file is laid out; the
+example in `${CLAUDE_PLUGIN_ROOT}/tests/fixtures/valid.toml` shows a complete
+one.
+
 ## 1. The draft
 
-One block per finding. Every field is filled, or says `none`.
+One per finding, in the data file. The scores and the cause sit on the
+finding itself; the rest of the draft under `[finding.draft]`. Every field is
+filled, or says `none`.
 
-```
-#            3
-Scores       Chance 3 · Customer 3 · Security – · GDPR – · Arch 1 · Layers 0 · Fix effort 1 · Verdict ticket
-Cause        ✎ shop/settings.py:40 → shop/pricing.py:142
-Sequence     1. We delete the upgrade step for old settings files.
-             2. An old shop's settings still say currency:, and nothing reads that key any more.
-             3. The shop starts without prices. Every product page shows "price on request".
-Who sees it  every visitor of a shop installed before the change
-Mechanism    the four or five lines that matter, quoted, each with file:line (verified on the branch)
-Fix          the smallest change that closes it; a structural fix named separately, if there is one
-Justify      one sentence per score of 3 or more
-Proof        what a probe printed, if one ran
-Must keep    the conditions, numbers and qualifiers the finding depends on:
-             "only shops installed before version 2", "only when the cache is on"
-Glossary     domain nouns used above, and whether the project's glossary has them
+```toml
+[[finding]]
+id = "3"
+chance = 3
+customer = 3
+fix_effort = 1
+verdict = "ticket"
+cause = "✎ `shop/settings.py:40` → `shop/pricing.py:142`"
+
+[finding.draft]
+sequence = ["We delete the upgrade step for old settings files.",
+            "An old shop's settings still say currency:, and nothing reads that key any more.",
+            "The shop starts without prices. Every product page shows \"price on request\"."]
+who_sees_it = "every visitor of a shop installed before the change"
+mechanism = "the four or five lines that matter, quoted, each with file:line (verified on the branch)"
+fix = "the smallest change that closes it; a structural fix named separately, if there is one"
+justify = "one sentence per score of 3 or more"
+proof = "what a probe printed, if one ran"
+must_keep = ["only shops installed before version 2", "only when the cache is on"]
+glossary = "domain nouns used above, and whether the project's glossary has them"
 ```
 
 What the draft must hold before anything is written:
@@ -58,6 +74,38 @@ What the draft must hold before anything is written:
 
 A draft that cannot fill Sequence or Who sees it is not a finding yet. It is a
 question for the author (a `talk`) or a line in `review/ISSUES.md`.
+
+### A developer finding
+
+A finding from the developer half (`D1`, `D2`, …) uses the same draft, with two
+differences:
+
+```toml
+[[finding]]
+id = "D2"
+rule = "Manageable"
+next_change = 3
+security = "–"
+gdpr = "–"
+layers = "–"
+fix_effort = 1
+verdict = "ticket"
+
+[finding.draft]
+sequence = ["We write the fallback colour for the buttons in three places.",
+            "A developer changes it for the chat button.",
+            "The send button keeps the old colour, and no test notices."]
+who_sees_it = "the next developer who changes a button's colour"
+```
+
+- **The developer is the actor.** The Sequence ends with what the next person
+  who touches this code runs into: the place they miss, the comment that
+  misleads them, the test that stays green.
+- **Who sees it** is that developer, named by what they set out to do ("the
+  next developer who adds a brand"), not "maintainers".
+
+Everything else — Mechanism, Fix, Must keep, Justify — is the same, and so are
+the writing rules and the editor pass below.
 
 ## 2. Writing
 
@@ -95,6 +143,15 @@ Four habits behind it:
 fallback string", used a dozen times as a label, means nothing to the shop
 owner. "The 'We're closed' text the shop owner sets under Opening hours" does.
 
+**Personal data never goes in.** Not in a draft, a note, a TODO line, a probe
+or a comment. The records name roles ("the author", "the operator"), never
+people. Real data a probe or a quote picks up (a customer's e-mail address,
+name, phone number, IBAN) is replaced where it stands by a typed placeholder:
+`<customer email>`, `<customer name>`. When its shape is the point (a `+` in
+an address, an odd domain), use a made-up value of the same shape on a domain
+reserved for examples: `jane+orders@example.com`, `shop.test`. It almost
+never matters at review level which customer it was.
+
 **"We" is the inclusive we.** All of us are responsible for the code and work
 on it together, so it is "we" whoever wrote the change.
 
@@ -125,16 +182,15 @@ someone then sees.
 
 ### What happens / Why / Fix
 
-Every finding in a note, and every zoom-in, has the same shape:
+Every finding in a note, and every zoom-in, has the same shape. In the data
+file it is four fields; the renderer turns them into the block:
 
-```
-### <n>. <the title, word for word>
-
-<its score row>
-
-**What happens.** ...
-**Why.** ...
-**Fix.** ...
+```toml
+title = "..."          # the heading, the table's Finding cell and the TODO line
+what_happens = '''...'''
+why = '''...'''
+fix = '''...'''
+justify = '''...'''    # one sentence per score of 3 or more
 ```
 
 The three parts answer three different questions. Blending them into prose
@@ -142,7 +198,11 @@ loses all three.
 
 - **What happens.** The **Sequence**, written out for someone who has not read
   the code. The trigger, then what the customer or operator sees. No file
-  names. The test: could the operator repeat it to a colleague?
+  names. The test: could the operator repeat it to a colleague? For a
+  developer finding, the trigger is the next change and the end is what that
+  developer runs into: "A developer changes the chat button's colour. The send
+  button keeps the old one, and no test notices." Still no file names: they go
+  in Why.
 - **Why.** The **Mechanism**. This is where the citations live. Mark what the
   change touched (✎) and unchanged code it reaches (→). Most real findings sit
   on the → side: the new code is fine, and an old reader breaks. Quote the four
@@ -174,8 +234,12 @@ they name code and changes, and rewording them without knowing the code is how
 a fix stops being exact.
 
 Start a **fresh** sub-agent: a general-purpose agent, never a fork, because a
-fork carries the writer's context and reads past the same jargon. Give it:
+fork carries the writer's context and reads past the same jargon. Start it from
+the workspace, and give it:
 
+- the rules block from `${CLAUDE_PLUGIN_ROOT}/reference/rules.md`, word for
+  word, at the top of the prompt: a fresh agent sees nothing else of them, and
+  it must not write anywhere;
 - the path of this file, `${CLAUDE_SKILL_DIR}/SKILL.md`, to read first;
 - the drafts;
 - each finding's title and What happens.
@@ -209,30 +273,39 @@ editor. Two readers who each guard one thing would otherwise trade "you lost
 my nuance" and "that is still unclear" without end. The editor reads once;
 the writer decides, and that is final.
 
-Then run the checker on the note:
+Then check the data file and render the note:
 
 ```
-python3 ${CLAUDE_SKILL_DIR}/check_note.py review/<the note>.md
+python3 -B ${CLAUDE_PLUGIN_ROOT}/scripts/note.py render review/<the note>.toml
 ```
 
-It reports a table row with the wrong number of cells, a title over two
-sentences or holding code, a detail heading that is not the title word for
-word, a block without its score row or one of the three labels, and the banned
-nouns in titles and What happens. Fix what it reports. Whether the words are
-right is still a read.
+`render` checks first and writes nothing when the check fails. It reports a
+title over two sentences or holding code or a file, a banned noun in a title or
+What happens, a file citation in What happens, a missing field or score, a
+score of 3 or more without its justify sentence, a finding for a half that did
+not run, an empty Rules walked list, and any e-mail address outside the
+reserved example domains. Fix what it reports in the data file, and render
+again. Whether the words are right is still a read.
 
 ## Replying
 
 The note is complete. The reply is short.
 
 - **Compact by default.** A reply about findings shows the **full** findings
-  table — every column, never a cut-down one — then what blocks, the questions
-  for the operator, and the commands. What / Why / Fix stays in the note until
+  tables — both halves, every column, never a cut-down one; a half that did
+  not run gets one line saying so — then what blocks, the questions for the
+  operator, and the commands. What / Why / Fix stays in the note until
   the operator asks for one.
 - **Answer, stop, wait.** Do not re-show a table, re-list findings or recap
   earlier conclusions unless asked.
 - **One thing at a time.** Answer the item asked. Anything else that surfaced
   goes into `review/TODO.md` silently (see `review-followup`).
+- **Never a bare item number.** Parking is silent, so the operator has never
+  seen most TODO items. Every item number in a reply carries what it is, in a
+  few words, at least the first time in that reply: "A11 (read-only in
+  layers)", not "A11". Three or more numbers become a small table of number
+  and title. A finding's number from the note is enough on its own only while
+  that note is the one being discussed.
 - **When the operator paraphrases a finding back**, correct only what would
   change what they do. A wrong noun that leads to the wrong fix is worth
   correcting. A loose word that still lands on the right conclusion is not.

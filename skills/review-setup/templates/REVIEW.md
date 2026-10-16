@@ -1,9 +1,9 @@
+<!-- review format: 2 -->
 # Reviewing <project>
 
 The single guide for how we review code in `<project>/`: the rules, the
-architecture we measure against, how a finding is scored, and the shape every
-review note takes. How a finding is *worded* is set by the review skills, not
-here.
+architecture we measure against, and how a finding is scored. How a finding is
+*worded*, and the shape of a note, are set by the review skills, not here.
 
 This file starts small on purpose. When a review turns up a rule we were
 applying but had not written down, it gets added. When a score or a verdict
@@ -13,16 +13,14 @@ turns out wrong in practice, it gets rewritten here, with the date.
 
 ## 1. How we work
 
-**Reviews are read-only.** No edits to `<project>/`, no git writes. Reading git
-history and diffing branches is fine.
+**Reviews are read-only**, by the rules the review skills bring with them. The
+test and linter commands are in the workspace `CLAUDE.md`.
 
-**Tests:** <never run by the reviewer; the review ends with the exact command
-for the operator | run with `<command>` from `<folder>`>.
+**What the linter covers:** <what it selects and ignores, if that matters for
+what counts as a finding.>
 
-**Linter:** `<command>` from `<folder>`. <What it selects and ignores, if that
-matters for what counts as a finding.>
-
-**One note per merge request**, named `mr-<n>-<branch-slug>.md`, in this folder.
+**One note per merge request**: its data file `mr-<n>-<branch-slug>.toml`, and
+the `.md` rendered from it, in this folder.
 Pre-existing weaknesses go in `ISSUES.md` instead — see §5.
 
 **Merge requests are identified by branch.** <With `gh`/`glab`: the CLI maps
@@ -44,33 +42,37 @@ rule, they win.
 Each rule says what it means concretely, so a finding can point at the rule and
 the rule can be argued with. A starting set — sharpen it as reviews go.
 
-### Readable by a human
+Each rule has a short name, in bold in its heading. Findings (the Rule column)
+and the note's "Rules walked" list use exactly that name; a new rule gets one
+when it is added.
+
+### **Readable** — by a human
 
 Someone who did not write it can follow it at reading speed. Comments explain
 *why*, not *what*. A comment that no longer matches the code it sits above is a
 finding — a stale comment is worse than none, because it is trusted.
 
-### Manageable by a human
+### **Manageable** — by a human
 
 The next change to this code is obvious and local. A reviewer can name every
 place that must change together. When one behaviour is expressed in two places
 kept in sync by nothing, say so and name both.
 
-### Passes the linter
+### **Linter** — passes it
 
 The command in §1. Do not raise style the linter does not enforce as a finding.
 
-### Abides by the architecture, or moves toward it
+### **Architecture** — abides by it, or moves toward it
 
 Never away from it. See §4.
 
-### Simple
+### **Simple**
 
 Prefer the version with fewer moving parts and fewer states. A new sentinel
 value, a new parameter with a default, or a new protocol method each need to
 earn their place.
 
-### Focused
+### **Focused**
 
 - **No spreading of configuration.** One fact, one home.
 - **No fallback stacked on fallback.** Catch, log, then either stop or do one
@@ -79,11 +81,18 @@ earn their place.
 - **No widening of scope.** A structural change that also adjusts a threshold
   or a config value is two changes.
 
-### Complete
+### **Complete**
 
 When a change touches one of a group — one error path, one of four routes, one
 of two backends — enumerate the group and say what the untouched members now
 disagree with.
+
+### **Tested**
+
+A new test fails when the behaviour it is named for breaks. A test that reads
+the source text, or asserts on exactly how something is written, fails when
+the code is rephrased and passes when it is wrong. Read what the assertion
+reads, not what the test is called.
 
 ---
 
@@ -93,7 +102,8 @@ Checked explicitly every review, and the note says so even when the answer is
 "not touched".
 
 <From the setup questions: an admin side, auth, payments, personal data, data
-retention, … One heading each, with what exactly to check. Delete this section's
+retention, … One heading each, with a short name in bold (`### **Payments** —
+refunds and charges`) and what exactly to check. Delete this section's
 placeholder if there is nothing yet.>
 
 ---
@@ -117,121 +127,26 @@ change that weakens it to make an import work is a finding.>
 
 ---
 
-## 5. How a finding is scored
+## 5. How we score here
 
-The columns are fixed by the review skills. This section says how to score
-them **for this project**. The defaults below are a starting point.
+The columns, the default scales and the verdicts are the same in every project
+and come with the review skills (`reference/scoring.md` in the plugin). This
+section says how to score **for this project**, and where its scale differs
+from the defaults. Where they disagree, this section wins here.
 
-### The columns
-
-| Column | How we score it here |
+| Column | Here |
 |---|---|
-| **Chance** | How often <a customer / a user> hits the **visible effect** in normal use. Depends on facts the code does not carry (<who is served, what is live>), so ask rather than infer. |
+| **Chance** | How often <a customer / a user / another service> hits the visible effect in normal use. What is live: <which sites, shops or tenants are served; which settings are on>. Ask when it is not known. |
 | **Customer** | How bad it is for <the person affected> when it happens. |
-| **Security** | Does it let someone do something they should not be able to do. |
-| **GDPR** | Does it expose, mix or over-retain personal data. <`–` throughout if the project handles none.> |
-| **Arch** | Does it move away from §4, or break a rule in §2. |
-| **Layers** | How many separate places absorb this one failure. See below. |
-| **Fix effort** | How much work the fix is. This drives sequencing. |
+| **GDPR** | <Scored: the project handles <which personal data> | `–` throughout: the project handles none.> |
 
-### Layers
-
-Counts **places that absorb the same failure** with the same outcome, so no log
-line says which one fired.
-
-| | |
-|---|---|
-| `–` | Not a layering problem. |
-| `0` | Counted, and there is one place. |
-| `1` | One guard plus one documented degradation, in the same function. |
-| `2` | Two places in one module can swallow the same input. |
-| `3` ⚠️ | Two modules, or a catch inside a catch. |
-| `4` ❗ | Three or more modules, each covering for the same failure. |
-| `5` ❗ | As 4, and one layer substitutes a value, so the failure has no log line anywhere. |
-
-Name every place in the detail block. A Layers score without that list cannot
-be argued with.
-
-### The scale
-
-`0`–`5`, or **`–`** when the column does not apply. Do not score a column just
-because it exists.
-
-- **❗ on 4–5**, **⚠️ on 3**, plain below.
-- **Anything ≥ 3 needs one sentence of justification** in its detail block.
-- **`?` in Chance** when nobody has measured it. The first fix is then a
-  measurement.
-- A score that depends on merge order is written `0 → 4 ❗ (if MR n lands)`.
-
-### Verdict
-
-A recommendation. The operator decides.
-
-| | |
-|---|---|
-| `block` ❗ | Does not merge until this is fixed on the branch. Argued, not asserted: the detail block names what a customer or operator would experience if it merged as it stands. |
-| `ticket` | Merges. The fix becomes tracked work — say where it goes. |
-| `talk` | The author has to answer something first, and the answer decides. |
-| `–` | Recorded, nothing to do. |
-
-### Three kinds of problem, two destinations
-
-| | Where it goes |
-|---|---|
-| Defect in the new code | Finding. |
-| The new code hands old code something it was never given, and the old code breaks | **Finding.** The MR owns it. |
-| Pre-existing weakness the change merely revealed | `ISSUES.md`. |
-
-The revert test separates the last two: would this still be broken if the MR
-were reverted?
-
-### The shape of a note
-
-Sections with nothing to say are kept and marked "not touched".
-
-````markdown
-# MR <n> — `<branch>`
-
-Reviewed <date>, read-only. Base `<merge-base>`, head `<sha>`.
-
-| | |
-|---|---|
-| Commits | `<sha>` <subject>, … |
-| Diff | <n> files, +<a> / −<b> |
-| Author | <name> |
-
-## What it does
-Two to six neutral sentences. What the author set out to do and how.
-
-## Findings
-The scoring table, worst first, every ✓ empty. Then one detail block per
-finding, as the review skills describe.
-
-## Verified as not a problem
-
-## Architecture check
-Against §4.
-
-## Rules check
-Against §2 and §3, naming each §3 area explicitly.
-
-## Interaction with other open MRs
-
-## Suggested disposition
-What blocks merge, what becomes a ticket, what needs the author.
-
-## Commands for the operator
-```
-<test command>
-<linter command>
-```
-````
+<Changes to a default scale, with the date and why: "Layers 2 also covers two
+modules that share one log line (2026-11-02, after MR 18)." None yet.>
 
 ---
 
 ## 6. Review log
 
-Worst row per MR, for triage. Full tables in the notes. Newest first.
-
-| MR | Branch | Reviewed | Headline | Worst row |
-|---|---|---|---|---|
+Kept in `LOG.md`, next to this file: one row per review, newest first. This
+file is the standard and is read in full at the start of every review, so the
+record of what was reviewed lives apart from it.
