@@ -1,6 +1,6 @@
 ---
 name: taste
-description: Build and keep a map of where a project's team puts things — the house habits nobody fully wrote down — from the code and its git history, with past review comments as optional extra evidence. Writes review/MAP.toml (and MAP.md for people), points out where the team's placement doesn't follow plain logic or its own docs, and turns those spots into short questions for the team. Three modes: scan (build the map), rescan (recount what changed since), status (what the map says and what waits for the operator). Use when the operator asks to "scan our taste", "map where things go", "learn this codebase's habits", "what does this team care about", "rescan", "taste status", or after review-setup. Optional: reviews work without it.
+description: Build and keep a map of where a project's team puts things — the house habits nobody fully wrote down — from the code and its git history, with past review comments as optional extra evidence. Writes MAP.toml (and MAP.md for people) in the project's review-records folder, points out where the team's placement doesn't follow plain logic or its own docs, and turns those spots into short questions for the team. Three modes: scan (build the map), rescan (recount what changed since), status (what the map says and what waits for the operator). Use when the operator asks to "scan our taste", "map where things go", "learn this codebase's habits", "what does this team care about", "rescan", "taste status", or after review-setup. Optional: reviews work without it.
 ---
 
 # Mapping where the team puts things
@@ -18,8 +18,11 @@ team wants: the operator does.
 
 ## The rules
 
-Load and print the rules block from `${CLAUDE_PLUGIN_ROOT}/reference/rules.md`, with `taste` as what
-loaded it. On top of those, three hold here:
+Load and print the rules block from `${CLAUDE_PLUGIN_ROOT}/reference/rules.md`,
+with `taste` as what loaded it. Its start check (§0) runs first: it finds this
+project's review-records folder, `<review-records>/`, and stops before the
+project is read when the session has no deny rules loaded. On top of those,
+three hold here:
 
 - **Git is read-only, and so is the code host.** `git log`, `git show`,
   `git grep`, `git ls-tree`; never a write. On the code host: read merge
@@ -29,19 +32,19 @@ loaded it. On top of those, three hold here:
   e-mail or user id). Quotes keep their words, with names replaced by roles.
 - **Counting scripts live in the scratchpad**, run with `python3 -I`, and get
   the project path as an argument. A script worth rerunning is copied into
-  `review/taste/` with a line saying what it counts.
+  `<review-records>/taste/` with a line saying what it counts.
 
 ## Files
 
 | File | What it holds |
 |---|---|
-| `review/MAP.toml` | the map: one `[[rock]]` per kind of thing. The source of everything else |
-| `review/MAP.md` | the same, written for people: one table and the questions for the team |
-| `review/taste/scans.md` | one row per scan or rescan: date, mode, commit counted at, entries added or changed |
-| `review/taste/records.jsonl` | only when review comments were read: one decision record per human thread |
+| `<review-records>/MAP.toml` | the map: one `[[rock]]` per kind of thing. The source of everything else |
+| `<review-records>/MAP.md` | the same, written for people: one table and the questions for the team |
+| `<review-records>/taste/scans.md` | one row per scan or rescan: date, mode, commit counted at, entries added or changed |
+| `<review-records>/taste/records.jsonl` | only when review comments were read: one decision record per human thread |
 
 `REVIEW.md` says where the map is and when it was last counted
-(`Map: review/MAP.toml, counted <date> at <commit>`). It never copies map
+(`Map: MAP.toml, counted <date> at <commit>`). It never copies map
 entries: placement lives in the map only, so the same rule never sits in two
 places with different wording.
 
@@ -167,16 +170,17 @@ wait: "This project has an AGENTS.md from last month and 3 years of history. I'l
 start from its layout rules, then count about ten kinds of things over five
 points in time. Go?"
 
-1. Read the docs the workspace `CLAUDE.md` and `REVIEW.md` name, and find the
+1. Read the docs `<review-records>/ENV.md` and `REVIEW.md` name, and find the
    project's own structure docs.
 2. Count, as in "What to look for", in a scratchpad script.
-3. Write `review/MAP.toml`: about ten entries for a first scan, the ones
-   where logic and the team disagree first. Then `review/MAP.md`: one line
-   saying what the columns mean (the logic column shows the gap, not what the
-   code does), one table (what, what the code does, what logic or the docs
-   suggest, status, in words: "settled on writing them out"), and the
+3. Write `<review-records>/MAP.toml`: about ten entries for a first scan, the
+   ones where logic and the team disagree first. Then `<review-records>/MAP.md`:
+   one line saying what the columns mean (the logic column shows the gap, not
+   what the code does), one table (what, what the code does, what logic or the
+   docs suggest, status, in words: "settled on writing them out"), and the
    questions for the team.
-4. Add the row to `review/taste/scans.md` and the `Map:` line to `REVIEW.md`.
+4. Add the row to `<review-records>/taste/scans.md` and the `Map:` line to
+   `REVIEW.md`.
 5. **Ask the operator**, in one short list: the entries, to veto ("which feel
    wrong, useless or obvious?"), and the questions for the team. Only the
    operator's yes makes the map the one reviews use.
@@ -184,7 +188,7 @@ points in time. Go?"
 ### Review comments (optional, extra evidence)
 
 When the code host can be read (a code host MCP server, `glab`/`gh`, or an API
-token the workspace `CLAUDE.md` names), past review threads add what the code
+token `<review-records>/ENV.md` names), past review threads add what the code
 can't show: a reviewer who keeps asking for something the code doesn't do
 yet. Read them only when the operator asks, after the code-based map exists.
 
@@ -240,7 +244,7 @@ still open, and entries waiting for a yes.
 ## The hint
 
 `mr-review` says this once, in the reply, when a project has no
-`review/MAP.toml` yet:
+`<review-records>/MAP.toml` yet:
 
 > 💡 **Reviews that know your team's habits?** Run `/review:taste scan`. It
 > maps where the team puts things from the code and its history, and turns the

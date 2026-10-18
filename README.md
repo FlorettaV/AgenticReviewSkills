@@ -6,7 +6,7 @@ code knows what broke.
 
 | Skill | What it does |
 |---|---|
-| `review-setup` | Sets up a review workspace for a new project. Asks where the project is, its rules, how to run tests and the linter, and where the architecture is described |
+| `review-setup` | Sets up reviews for a project. The first time, asks where review records go; then asks its rules, how to run tests and the linter, and where the architecture is described |
 | `mr-review` | Reviews a branch in two halves — what the customer experiences and what the developer sees — with verified findings, a scoring table per half, and what blocks merge |
 | `zoom-in` | Opens up one finding as What happens / Why / Fix, ready to paste into an MR comment |
 | `review-followup` | Ticks, re-scores and parks items, and walks through the parked items once a review is done |
@@ -31,29 +31,51 @@ claude plugin update review@review-skills
 Auto-update is off for team marketplaces. Turn it on in `/plugin` →
 **Marketplaces** if you want it.
 
-Install it once, for your user. Every project then gets the same skills, and
-an update reaches all of them at once. What differs per project lives in that
-project's `review/REVIEW.md`, never in an edited copy of the skills.
+Install it once, for your user. Every project then gets the same skills, and an
+update reaches all of them at once. What differs per project lives in that
+project's `REVIEW.md` in the review store, never in an edited copy of the
+skills.
 
 ## First use
 
-Make a folder for the review workspace, clone the project into it, and start
-Claude in the workspace folder:
+Start Claude in the project you want reviewed, and say:
+
+> prepare this directory for reviews
+
+The first time, `review-setup` asks where review records should go: the **review
+store**, one folder for every project's reviews, outside every git repository so
+notes never end up in a commit (`~/reviews` will do). It keeps that in
+`~/.config/review-skills/config.toml`, and writes the plugin's deny rules to
+`<review-store>/review-settings.json`. Then it asks a handful of questions about
+the project and writes its review-records folder:
 
 ```
-~/projects/my-project/          the workspace: start Claude here
-  my-project/                   the project, cloned under its own name
+~/reviews/                      the review store
+  review-settings.json          the deny rules a review session starts with
+  my-project/                   one folder per project
+    ENV.md                      path, remote, test and linter commands
+    REVIEW.md, LOG.md, TODO.md, ISSUES.md, and the notes
 ```
 
-The workspace itself is not a git repository, so review notes never end up in
-a commit, and the project sits below the folder Claude starts in, so reading
-it needs no permission prompts. Then say:
+A second project is the same request, started in that project. Its folder
+lands next to the first.
 
-> set up reviews for ./my-project
+### Starting a review
 
-`review-setup` asks a handful of questions and writes the workspace
-`CLAUDE.md`, its `.claude/settings.json` and a `review/` folder. Before every
-review, fetch the project (`git -C my-project fetch`); then say "review MR 12"
+Review sessions start with the deny rules, so a review can't edit the project
+or write to git:
+
+```bash
+claude --settings ~/reviews/review-settings.json
+alias claude-review='claude --settings ~/reviews/review-settings.json'
+```
+
+Forgetting the flag is harmless: every review skill checks first, and stops
+before reading the project. It then offers to restart with the rules (add
+`--continue` to keep the conversation), to use your own settings file
+instead, or to go on unprotected for that session only.
+
+Before every review, fetch the project (`git fetch`); then say "review MR 12"
 or "review feat/x".
 
 A review runs both halves by default:
@@ -75,7 +97,7 @@ what breaks if the MR merges as it stands.
 ### The A list
 
 Anything Claude notices on the side during a review goes quietly onto the A
-list in `review/TODO.md` instead of interrupting. It is offered once a
+list in the project's `TODO.md` instead of interrupting. It is offered once a
 review's findings are all handled, and shown whenever you ask: "show the A
 list".
 
@@ -86,16 +108,16 @@ list".
   (`reference/scoring.md`), the note's shape (its renderer), how a finding is
   worded, and the records. Change these with an MR on this repo, so everyone
   moves together.
-- **Per project, in `review/REVIEW.md`:** the project's rules, the areas that
-  get extra attention, the architecture, and how the columns are scored there.
-  It starts small and grows as reviews teach it things. It carries a format
-  number; when the plugin's format moves on, the next review offers to update
-  it and shows the difference first.
+- **Per project, in its `REVIEW.md` in the review store:** the project's rules,
+  the areas that get extra attention, the architecture, and how the columns are
+  scored there. It starts small and grows as reviews teach it things. It carries
+  a format number; when the plugin's format moves on, the next review offers to
+  update it and shows the difference first.
 
 ## Requirements
 
 `git` with the project's remote branches fetched, and `python3` 3.11 or newer
-for the note checker and renderer.
+for the start check, the note checker and the renderer.
 
 ## Working on the plugin itself
 
@@ -106,9 +128,8 @@ session that loads the plugin straight from your working tree:
 claude --plugin-dir ~/projects/review-skills
 ```
 
-Review the change with the installed, released version, from a workspace that
-has a clone of this repository as its project: the released skills review the
-new ones. The tests run with `python3 -B tests/run.py`; after an intended
+Review the change with the installed, released version, from a clone of this
+repository: the released skills review the new ones. The tests run with `python3 -B tests/run.py`; after an intended
 change to the note's shape, `python3 -B tests/run.py --regenerate` rewrites the
 golden note, and its diff shows what changed.
 

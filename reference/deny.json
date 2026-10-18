@@ -1,7 +1,8 @@
 {
   "permissions": {
     "deny": [
-      "Edit(/<project>/**)",
+      "Bash(review-guard-canary*)",
+      "Edit(./**)",
       "Bash(git commit *)",
       "Bash(git add *)",
       "Bash(git rm *)",

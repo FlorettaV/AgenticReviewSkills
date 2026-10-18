@@ -1,12 +1,12 @@
 # How a finding is scored
 
 The parts of scoring that are the same in every project: the columns, the
-default scales, the verdicts, and where a problem goes. `mr-review`,
-`zoom-in` and `review-followup` read this file together with the project's
-`review/REVIEW.md` §5, which says how the columns are scored **for that
-project** (who the customer is, what is live, whether there is personal data)
-and where its scale differs from the defaults below. Where the two disagree,
-the project's §5 wins for that project.
+default scales, the verdicts, and where a problem goes. `mr-review`, `zoom-in`
+and `review-followup` read this file together with the project's
+`<review-records>/REVIEW.md` §5, which says how the columns are scored **for
+that project** (who the customer is, what is live, whether there is personal
+data) and where its scale differs from the defaults below. Where the two
+disagree, the project's §5 wins for that project.
 
 ## The columns
 
@@ -103,7 +103,7 @@ A recommendation. The operator decides.
 |---|---|
 | Defect in the new code | Finding. |
 | The new code hands old code something it was never given, and the old code breaks | **Finding.** The MR owns it. |
-| Pre-existing weakness the change merely revealed | `review/ISSUES.md`. |
+| Pre-existing weakness the change merely revealed | `<review-records>/ISSUES.md`. |
 
 **The revert test** separates the last two: would this still be broken if the
 MR were reverted? No → finding. Yes → issue. "The old code was fragile" does

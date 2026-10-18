@@ -1,11 +1,11 @@
 ---
 name: mr-review
-description: Review a merge request against review/REVIEW.md in two halves — customer (what a customer or operator experiences in normal use, scored on chance and harm) and developer (what we decided in the code: security, GDPR, how failures hide, and what the next developer runs into, walked rule by rule, plus how it fits the code around it) — with branch identity, verified findings tables, an architecture check, disposition. Use this whenever the operator asks to review an MR, a branch, or a set of changes ("review MR 13", "can we do a review on feat/x", "what do you think of this branch", "code only review of ABC-12", "just the customer side"), when they ask to add the missing half to an existing note ("now do the code side too"), and when they ask what changed on a branch or whether a change is safe to merge. Read-only: it never edits the project, never runs git writes, and runs tests only if the workspace allows it.
+description: Review a merge request against the project's REVIEW.md in two halves — customer (what a customer or operator experiences in normal use, scored on chance and harm) and developer (what we decided in the code: security, GDPR, how failures hide, and what the next developer runs into, walked rule by rule, plus how it fits the code around it) — with branch identity, verified findings tables, an architecture check, disposition. Use this whenever the operator asks to review an MR, a branch, or a set of changes ("review MR 13", "can we do a review on feat/x", "what do you think of this branch", "code only review of ABC-12", "just the customer side"), when they ask to add the missing half to an existing note ("now do the code side too"), and when they ask what changed on a branch or whether a change is safe to merge. Read-only: it never edits the project, never runs git writes, and runs tests only if the project's ENV.md allows it.
 ---
 
 # Reviewing an MR
 
-`review/REVIEW.md` is the project's review standard: the rules, the
+`<review-records>/REVIEW.md` is the project's review standard: the rules, the
 architecture we measure against, and how the columns are scored here. It is
 rewritten as reviews teach it things, so **read it first, every time**. What is
 the same in every project comes with the plugin and is read with it: the
@@ -14,8 +14,9 @@ columns, default scales and verdicts in
 and the rules in `reference/rules.md`. This skill is the working method. How
 anything is worded belongs to the `review-writing` skill.
 
-If the workspace has no `review/REVIEW.md`, stop before reviewing and offer the
-`review-setup` skill. A review without a standard has nothing to score against.
+If the start check finds no records for this project, stop before reviewing and
+offer the `review-setup` skill. A review without a standard has nothing to score
+against.
 
 ## Two halves: customer and developer
 
@@ -76,13 +77,12 @@ developer lens finds stays a `D` finding, also when a customer would see it:
 One bug never appears in both tables; the "Also seen by customers" line points,
 it does not repeat.
 
-## The workspace
+## The project and its records
 
-One layout, the same everywhere (rules §0): the workspace folder, with the
-project inside it under its own name, `review/` next to it, and Claude started
-in the workspace.
+One layout, the same everywhere (rules §0): Claude runs in the project, and the
+records live in the project's folder in the review store, `<review-records>/`.
 
-The workspace `CLAUDE.md` names the project folder and says what this
+`<review-records>/ENV.md` names the project folder and says what this
 environment has and lacks: the linter command, whether tests may be run, the
 code host and its CLI, the default branch. Read it rather than assuming. Where
 this skill writes `origin/main`, it means the remote's default branch.
@@ -93,18 +93,21 @@ glossary, repo rules). Read the ones it names before judging any code.
 ## The rules
 
 **First, load and print the rules**: read
-`${CLAUDE_PLUGIN_ROOT}/reference/rules.md` and print its block, with
-`mr-review` as what loaded it, before any other output. Everything there holds
-for the whole review: the project is read-only, no git writes (fetch included),
-tests and linter as the workspace `CLAUDE.md` says, probes in the scratchpad,
-and the rules block at the top of every sub-agent prompt.
+`${CLAUDE_PLUGIN_ROOT}/reference/rules.md` and print its block, with `mr-review`
+as what loaded it, before any other output. Its start check (§0) runs first: it
+finds this project's review-records folder, `<review-records>/`, and stops
+before the project is read when the session has no deny rules loaded. Everything
+there holds for the whole review: the project is read-only, no git writes (fetch
+included), tests and linter as `<review-records>/ENV.md` says, probes in the
+scratchpad, and the rules block at the top of every sub-agent prompt.
 
 ## Before the review
 
 A few checks, in this order, each one line of output at most, and silent when
 there is nothing to say.
 
-**Start the read-only check.** `touch review/.review-start` (rules §6).
+**Start the read-only check.** Keep the project's state in
+`<review-records>/.review-start` (rules §6).
 
 **Is `REVIEW.md` in the current format?** Its first line says
 `<!-- review format: <n> -->`; no line means format 1. The plugin writes
@@ -116,12 +119,12 @@ have. Offer once:
 > Your rules, areas, architecture and calibration stay; I'll show the
 > difference before writing anything.
 
-On a yes: take out what is now in `reference/scoring.md` and the renderer,
-keep every project-specific word (§1–§4, how §5 scores here, any change to a
-default scale), add the sections of the current template it lacks, raise the
-stamp, and show the difference before writing. Never overwrite what the
-project wrote. Move a review log found in it to `review/LOG.md`. Without a yes,
-review against it as it is.
+On a yes: take out what is now in `reference/scoring.md` and the renderer, keep
+every project-specific word (§1–§4, how §5 scores here, any change to a default
+scale), add the sections of the current template it lacks, raise the stamp, and
+show the difference before writing. Never overwrite what the project wrote. Move
+a review log found in it to `<review-records>/LOG.md`. Without a yes, review
+against it as it is.
 
 **Notes in an older format.** A note with no `.toml` next to it, or one
 `note.py check` calls older, is shown as it is: say so in one line ("MR 7's
@@ -132,8 +135,9 @@ a new review for a full one. It is never rewritten.
 branch under review (rules §2). When they differ, ask the operator to fetch,
 and wait.
 
-**Notes whose MR is done.** For each note in `review/`, read the head commit
-it reviewed from its header and check whether that MR is merged or closed:
+**Notes whose MR is done.** For each note in `<review-records>/`, read the head
+commit it reviewed from its header and check whether that MR is merged or
+closed:
 
 ```
 git merge-base --is-ancestor <reviewed head> origin/main   # merged
@@ -172,9 +176,9 @@ A branch that is `0 ahead / n behind` is already merged. Check before reviewing
 a ghost.
 
 **A stacked branch** (one built on another open branch) is diffed against the
-branch directly below it, not against `main`: the step below has its own
-review. Check the ancestry with `git merge-base --is-ancestor <below> <this>`,
-and keep a plan file (`review/<stack>-stack-plan.md`) with one row per step and
+branch directly below it, not against `main`: the step below has its own review.
+Check the ancestry with `git merge-base --is-ancestor <below> <this>`, and keep
+a plan file (`<review-records>/<stack>-stack-plan.md`) with one row per step and
 the commit each was reviewed at.
 
 ### 2. Read the intent, then the code
@@ -246,7 +250,7 @@ with.
 |---|---|
 | Defect in the new code | Finding |
 | New code hands old code something it never got before, and it breaks | **Finding** — the MR caused it, so the MR owns it |
-| Pre-existing weakness the change merely revealed | `review/ISSUES.md` |
+| Pre-existing weakness the change merely revealed | `<review-records>/ISSUES.md` |
 
 **The revert test** separates the last two: *would this still be broken if the
 MR were reverted?* No → finding. Yes → issue. "The old code was fragile" does
@@ -261,10 +265,10 @@ topic.
 
 Topics can go to sub-agents (forks) in parallel. Each prompt starts with the
 rules block, word for word (rules §7). They report back drafts (see
-`review-writing`); they never write to `review/`. Every draft a sub-agent
-proposes is re-checked before it goes into the note: print its cited lines,
-re-run its probe or read the code it quotes. The topic most likely to hold a
-GDPR or security finding is reviewed directly, not delegated.
+`review-writing`); they never write to `<review-records>/`. Every draft a
+sub-agent proposes is re-checked before it goes into the note: print its cited
+lines, re-run its probe or read the code it quotes. The topic most likely to
+hold a GDPR or security finding is reviewed directly, not delegated.
 
 ### 9. Prove it before you write it
 
@@ -363,10 +367,10 @@ a list, an error message, a name), ask three questions:
    together (fetch 25, show 5). An exception to a pattern with nothing saying
    why.
 
-**Use the map when there is one.** `review/MAP.toml` (made by the `taste`
-skill) says where the team puts each kind of thing, which file is the example,
-and how settled it is. Load only the entries whose `find` patterns match the
-files the MR touches. Then:
+**Use the map when there is one.** `<review-records>/MAP.toml` (made by the
+`taste` skill) says where the team puts each kind of thing, which file is the
+example, and how settled it is. Load only the entries whose `find` patterns
+match the files the MR touches. Then:
 
 | The entry is | Then |
 |---|---|
@@ -412,10 +416,10 @@ scored in this project. The renderer draws the tables.
 **Load the `review-writing` skill now** (`review:review-writing`), and follow its three steps:
 
 1. **Draft** every finding in its draft shape, from what steps 1–11 verified.
-2. **Write** the note's data file, `review/mr-<n>-<branch-slug>.toml`. It is
-   the note: every skill reads and writes it, and the Markdown note is rendered
-   from it. `${CLAUDE_PLUGIN_ROOT}/tests/fixtures/valid.toml` is a complete
-   example. It holds:
+2. **Write** the note's data file, `<review-records>/mr-<n>-<branch-slug>.toml`.
+   It is the note: every skill reads and writes it, and the Markdown note is
+   rendered from it. `${CLAUDE_PLUGIN_ROOT}/tests/fixtures/valid.toml` is a
+   complete example. It holds:
    - `format = 2`, and an `[mr]` table: `number`, `branch`, `reviewed`,
      `base`, `head`, `halves` (`["customer", "developer"]`, or the one that
      ran), `commits`, `diff`, `what_it_does`, `verified`, `architecture`,
@@ -447,7 +451,9 @@ operator actually decides on:
 - **What could not be checked**, and why. An unrun linter is a gap in the
   review, not a silent pass.
 - **The read-only check**, in one line: run it as rules §6 says, just before
-  publishing, and write what it found. Never clean up what it finds.
+  publishing, and write what it found, after the protection the review ran
+  under ("Protection: plugin rules. Read-only check: nothing changed in the
+  project."). Never clean up what it finds.
 
 ### The reply
 
@@ -461,24 +467,24 @@ note until the operator asks; the `zoom-in` skill produces it.
 Three small writes, then hand over to `review-followup` for everything the
 operator says afterwards:
 
-- a row at the top of the review log, `review/LOG.md`. Its worst row may be a
-  `D` row; say which half a single-half review covered;
-- one `R` line per finding in `review/TODO.md`, under a heading for this MR,
-  developer findings tagged with their number: `(MR <n> D1)`;
+- a row at the top of the review log, `<review-records>/LOG.md`. Its worst row
+  may be a `D` row; say which half a single-half review covered;
+- one `R` line per finding in `<review-records>/TODO.md`, under a heading for
+  this MR, developer findings tagged with their number: `(MR <n> D1)`;
 - for a stack, the step's row in the plan file.
 
 Anything else written for this MR (a prediction of the comments, a comparison
-with what reviewers said) goes in `review/experiments/`, never under the
-`mr-<n>-*` name: that name means a note, and the skills treat every file
+with what reviewers said) goes in `<review-records>/experiments/`, never under
+the `mr-<n>-*` name: that name means a note, and the skills treat every file
 with it as one.
 
 ## Parking what you did not come for
 
-A review turns up things that are not this MR's job. They go in `review/TODO.md`
-**silently** — no "I've added this to the list", no summary of what was parked.
-Each parked line carries the review it came from, `(MR <n>)`, so the
-end-of-review walk-through in `review-followup` can find it. Line format and
-numbering are in `review-followup`.
+A review turns up things that are not this MR's job. They go in
+`<review-records>/TODO.md` **silently** — no "I've added this to the list", no
+summary of what was parked. Each parked line carries the review it came from,
+`(MR <n>)`, so the end-of-review walk-through in `review-followup` can find it.
+Line format and numbering are in `review-followup`.
 
 This matters more than it sounds. A reply carrying six related findings buries
 the one question that was asked, and the reviewer stops being useful exactly
@@ -494,6 +500,7 @@ Answer and fix them in the current note only.
 Other notes, earlier reviews and other branches are touched only when the
 operator names them ("check all of today's notes", "fix step 2 too"). If the
 same problem obviously exists in another note, park one line in
-`review/TODO.md`, silently, as for any side-quest — do not go and fix it.
+`<review-records>/TODO.md`, silently, as for any side-quest — do not go and fix
+it.
 
 A fix that spreads to four notes turns one question into a session.

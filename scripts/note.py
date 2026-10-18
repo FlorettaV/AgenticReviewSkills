@@ -1,7 +1,7 @@
 """Check a review note's data file, and render it into the Markdown note people read.
 
-    python3 -B <plugin>/scripts/note.py check  review/mr-13-feat-x.toml
-    python3 -B <plugin>/scripts/note.py render review/mr-13-feat-x.toml
+    python3 -B <plugin>/scripts/note.py check  <review-records>/mr-13-feat-x.toml
+    python3 -B <plugin>/scripts/note.py render <review-records>/mr-13-feat-x.toml
 
 The .toml file is the note: every skill reads and writes it. The .md file next
 to it is rendered from it for people to read, and is never edited or read back.

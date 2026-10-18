@@ -22,14 +22,13 @@ Writing happens in three steps, always in this order:
 Keeping the facts apart from the wording means the editor can change every
 sentence without changing a single fact.
 
-Both live in the note's data file, `review/mr-<n>-<branch-slug>.toml`: the
-draft under each finding's `[finding.draft]`, the written text in its fields
+Both live in the note's data file, `<review-records>/mr-<n>-<branch-slug>.toml`:
+the draft under each finding's `[finding.draft]`, the written text in its fields
 (`title`, `what_happens`, `why`, `fix`, `justify`). The Markdown note people
 read is rendered from that file by `scripts/note.py` and never written by hand;
-the shape of a finding's block, its small score table and the ⚠️/❗ markers
-come from the renderer. `mr-review` says how the file is laid out; the
-example in `${CLAUDE_PLUGIN_ROOT}/tests/fixtures/valid.toml` shows a complete
-one.
+the shape of a finding's block, its small score table and the ⚠️/❗ markers come
+from the renderer. `mr-review` says how the file is laid out; the example in
+`${CLAUDE_PLUGIN_ROOT}/tests/fixtures/valid.toml` shows a complete one.
 
 ## 1. The draft
 
@@ -69,11 +68,11 @@ What the draft must hold before anything is written:
 - **Must keep** lists every condition that makes the finding true. If a
   sentence without it would be wrong or would overstate, it belongs here. It
   is what stops a plainer sentence from becoming a less true one.
-- **Scores** use the project's scale from `review/REVIEW.md`. Every score of 3
-  or more has its sentence in **Justify**.
+- **Scores** use the project's scale from `<review-records>/REVIEW.md`. Every
+  score of 3 or more has its sentence in **Justify**.
 
 A draft that cannot fill Sequence or Who sees it is not a finding yet. It is a
-question for the author (a `talk`) or a line in `review/ISSUES.md`.
+question for the author (a `talk`) or a line in `<review-records>/ISSUES.md`.
 
 ### A developer finding
 
@@ -267,8 +266,8 @@ they name code and changes, and rewording them without knowing the code is how
 a fix stops being exact.
 
 Start a **fresh** sub-agent: a general-purpose agent, never a fork, because a
-fork carries the writer's context and reads past the same jargon. Start it from
-the workspace, and give it:
+fork carries the writer's context and reads past the same jargon. It runs in
+the same session, under the same deny rules. Give it:
 
 - the rules block from `${CLAUDE_PLUGIN_ROOT}/reference/rules.md`, word for
   word, at the top of the prompt: a fresh agent sees nothing else of them, and
@@ -313,7 +312,7 @@ the writer decides, and that is final.
 Then check the data file and render the note:
 
 ```
-python3 -B ${CLAUDE_PLUGIN_ROOT}/scripts/note.py render review/<the note>.toml
+python3 -B ${CLAUDE_PLUGIN_ROOT}/scripts/note.py render <review-records>/<the note>.toml
 ```
 
 `render` checks first and writes nothing when the check fails. It reports a
@@ -336,7 +335,7 @@ The note is complete. The reply is short.
 - **Answer, stop, wait.** Do not re-show a table, re-list findings or recap
   earlier conclusions unless asked.
 - **One thing at a time.** Answer the item asked. Anything else that surfaced
-  goes into `review/TODO.md` silently (see `review-followup`).
+  goes into `<review-records>/TODO.md` silently (see `review-followup`).
 - **Never a bare item number.** Parking is silent, so the operator has never
   seen most TODO items. Every item number in a reply carries what it is, in a
   few words, at least the first time in that reply: "A11 (read-only in
