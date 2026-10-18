@@ -139,6 +139,39 @@ Four habits behind it:
    project's glossary and would not survive being said out loud to the author,
    it is a label standing where a sentence should be.
 
+**One unknown word costs the whole paragraph.** A reader who meets a term,
+label, abbreviation or score they don't know can't skip it: they re-read
+everything around it to guess what it means, and careful reading is the most
+expensive thing we can ask of them. So:
+
+- No word, label or abbreviation the reader hasn't seen explained. That
+  includes our own: a finding's number on its own ("D1") in a later message,
+  a verdict word ("talk"), a mark (✎), an invented heading ("Reader stop").
+  Give the meaning where it appears ("D1, the address written in seven
+  places"), or leave it out.
+- No bare score in a sentence. "Chance 2 · Customer 1" means nothing without
+  the scale; say it in words, or put the scale next to it. (The note's tables
+  still show bare numbers; giving them their scale is an open change to the
+  renderer.)
+- A term that's worth keeping is explained once, kept, and used the same way
+  every time after. Then it saves the reader effort instead of costing it.
+  The shared ones are in `${CLAUDE_PLUGIN_ROOT}/docs/glossary.md`: a word
+  from there may be used as it is; a new one goes in only with the
+  operator's yes.
+
+**Point at what the reader may know.** "The same as the stale error in the
+order modal" or "the other providers do this, see <file>" can bring back what
+the reader already knows about that code. A finding that names a familiar
+file costs less to take in than one that explains from scratch.
+
+**A question offers its likely answer.** Checking an answer costs far less
+than coming up with one. Not "why is this mixed?" but "these used to go here,
+newer ones go there. Did we switch?" Put the evidence next to it, in a few
+numbers, so a quick yes is still an informed one.
+
+**Fewer points.** Every point costs the reader something, even a weak one.
+Leave out what has nothing behind it but a preference.
+
 **Name a thing by what people see, not by the code's word for it.** "The
 fallback string", used a dozen times as a label, means nothing to the shop
 owner. "The 'We're closed' text the shop owner sets under Opening hours" does.
@@ -256,6 +289,10 @@ rules:
   asks rather than guesses: "Which shops count as old?" A sentence the editor
   cannot follow is one a colleague cannot follow either. A sentence it merely
   would have written differently gets a rewrite or nothing, not a question.
+- **It flags every word it had to guess at**: a term, label, abbreviation,
+  number or score whose meaning isn't given where it appears. That's the
+  reader's most expensive moment, so each one is reworded, explained or
+  flagged, never left.
 - **It lists each change**, old → new, with the rule it applied.
 
 **The questions and flags come back to the writer**, not to the operator. The

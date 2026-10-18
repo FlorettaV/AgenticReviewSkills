@@ -1,6 +1,6 @@
 # review — merge request reviews with Claude Code
 
-Five skills that review merge requests the same way for everyone: read-only,
+Seven skills that review merge requests the same way for everyone: read-only,
 every claim verified, every finding written so someone who never opened the
 code knows what broke.
 
@@ -11,6 +11,8 @@ code knows what broke.
 | `zoom-in` | Opens up one finding as What happens / Why / Fix, ready to paste into an MR comment |
 | `review-followup` | Ticks, re-scores and parks items, and walks through the parked items once a review is done |
 | `review-writing` | Turns findings into plain language, then has a fresh editor pass check the wording |
+| `upkeep` | Checks the state of the review files (the same rule twice, contradictions, stale items, unexplained words) and offers a short list of trims and questions |
+| `taste` | Maps where the team puts things, from the code and its history, and turns the spots that don't add up into short questions for the team. Optional |
 
 ## Install
 
@@ -61,7 +63,8 @@ A review runs both halves by default:
   `1`, `2`, …
 - **developer**: what we decided in the code — security, GDPR, how failures hide,
   and what the next developer runs into — walked rule by rule against
-  `REVIEW.md` §2 and §3. Findings `D1`, `D2`, …
+  `REVIEW.md` §2 and §3, and compared with the code around it (its
+  neighbours, and the map from `taste` if there is one). Findings `D1`, `D2`, …
 
 Ask for one with "review MR 12, code only" (the developer half) or "customer only", and add the
 other later with "now do the customer side too". A skipped half is marked

@@ -1,6 +1,6 @@
 ---
 name: review-followup
-description: Keep the review records straight after a review note exists — tick rows, re-score a finding the operator corrected, park items, carry items to the end of a stack, walk through the parked items once a review's findings are all handled, and keep the note, review/TODO.md, the stack plan and the review log in review/LOG.md saying the same thing. Use this whenever the operator responds to findings already written down ("1 is intended, check", "tick 2 and 3", "D1 is fine", "I'll talk to them", "we decided to remove it", "note this for the end", "keep this for a recheck", "mark a cleanup on these at the end", "let's wait here", "let's go through the other finds"), and whenever a finding's premise changes after the note was written. Writes only in review/; never edits the project, never runs git writes, never runs tests unless the workspace allows it.
+description: Keep the review records straight after a review note exists — tick rows, re-score a finding the operator corrected, park items, carry items to the end of a stack, walk through the parked items once a review's findings are all handled, tidy the map of where the team puts things (review/MAP.toml) after a review, and keep the note, review/TODO.md, the stack plan and the review log in review/LOG.md saying the same thing. Use this whenever the operator responds to findings already written down ("1 is intended, check", "tick 2 and 3", "D1 is fine", "I'll talk to them", "we decided to remove it", "note this for the end", "keep this for a recheck", "mark a cleanup on these at the end", "let's wait here", "let's go through the other finds"), and whenever a finding's premise changes after the note was written. Writes only in review/; never edits the project, never runs git writes, never runs tests unless the workspace allows it.
 ---
 
 # After the note: keeping the records straight
@@ -96,7 +96,8 @@ list is, because the operator may never have seen it:
 > All findings on MR 13 are handled. While reviewing, I parked 4 other things
 > I noticed on the side (the A list in `review/TODO.md`) — go through them now?
 
-If there are none, say only that the findings are all handled.
+If there are none, say only that the findings are all handled. Either way,
+then tidy the map (below), if there is one.
 
 If the operator says yes, go through them **one at a time**. Show one item,
 in one or two sentences, and offer the four choices:
@@ -111,6 +112,32 @@ in one or two sentences, and offer the four choices:
 Wait for the answer before showing the next item. When the list is done, say
 how many went each way, in one line. If the operator stops halfway, the
 remaining lines simply stay open.
+
+## Tidy the map
+
+When a review's findings are all handled and the project has a
+`review/MAP.toml`, tidy the entries that review touched (those whose `find`
+patterns match its files). Lightly: it's there to keep the map pleasant to
+use, not to audit it. The `taste` skill describes the entries.
+
+- **Without asking:** recount those entries at the current commit, update
+  their counts, `direction` and `counted_at`, and add a row to
+  `review/taste/scans.md`.
+- **Offered, one short message, yes or no per line**, only what applies:
+  - a reason the operator gave during the follow-up, as a dated `why` with
+    who said it ("you said the address is written out so grep finds it; keep
+    that as the why?");
+  - "used in MR <n>; operator: on purpose" as evidence on an entry;
+  - a status the new counts clearly moved ("mixed → moving");
+  - two entries whose patterns hit the same files, to merge;
+  - entries no review has matched for a long time, to move to the archive
+    section at the bottom.
+- **Never:** change what an entry means without the operator's yes, and
+  never let a why change a status. Counts may update by themselves; meanings
+  only with a yes.
+
+Say in one line what was recounted, and wait for the answers to anything
+offered.
 
 ## Showing the list
 
