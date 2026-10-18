@@ -71,8 +71,8 @@ that agree). Some are in people's history (one reviewer asked four times).
 Some are facts in someone's head (how many items a list will ever hold). The last
 kind can only be asked, so ask it cheaply.
 
-**A map of where the team puts things** (`taste`, `review/MAP.toml`). Built
-from the code and its history, because that's where most of the taste is:
+**A map of where the team puts things** (`taste`, `<review-records>/MAP.toml`).
+Built from the code and its history, because that's where most of the taste is:
 moves (a pebble put under another rock), copies (which file is the example),
 spread over time (which way it's moving). Review comments are extra evidence.
 When the project has written docs on structure, the map starts from them and

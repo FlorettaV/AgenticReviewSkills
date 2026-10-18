@@ -19,14 +19,16 @@ next developer, as `review-writing` describes.
 
 **First, load and print the rules**: read
 `${CLAUDE_PLUGIN_ROOT}/reference/rules.md` and print its block, with `zoom-in`
-as what loaded it, before any other output. They hold here exactly as in a
-review: however obvious the fix is, it goes in the **Fix** section, not the
-tree; probes follow rules §4.
+as what loaded it, before any other output. Its start check (§0) runs first: it
+finds this project's review-records folder, `<review-records>/`, and stops
+before the project is read when the session has no deny rules loaded. They hold
+here exactly as in a review: however obvious the fix is, it goes in the **Fix**
+section, not the tree; probes follow rules §4.
 
 The columns, default scales and verdicts are in
-`${CLAUDE_PLUGIN_ROOT}/reference/scoring.md`; `review/REVIEW.md` §5 says how
-they are scored in this project. Read both rather than assuming: §5 changes.
-A note in an older format (no `.toml`) can be explained, not updated.
+`${CLAUDE_PLUGIN_ROOT}/reference/scoring.md`; `<review-records>/REVIEW.md` §5
+says how they are scored in this project. Read both rather than assuming: §5
+changes. A note in an older format (no `.toml`) can be explained, not updated.
 
 ## The steps
 
@@ -127,10 +129,10 @@ finding turns up neighbours — a related defect, a better architecture, a secon
 reader of the same field. Do not append them. The operator asked about one
 thing; a reply carrying five is how a clear explanation becomes a wall.
 
-Park the neighbours in `review/TODO.md` without mentioning it, tagged with the
-review they came from (format in `review-followup`), and answer what was asked.
-If a neighbouring finding genuinely changes the fix for *this* one, that
-belongs in **Fix** in a sentence — not as a second finding.
+Park the neighbours in `<review-records>/TODO.md` without mentioning it, tagged
+with the review they came from (format in `review-followup`), and answer what
+was asked. If a neighbouring finding genuinely changes the fix for *this* one,
+that belongs in **Fix** in a sentence — not as a second finding.
 
 The same goes for scope. A question asked while zooming in — including a meta
 one, "why does this look weird" — is about this finding and its note. Other

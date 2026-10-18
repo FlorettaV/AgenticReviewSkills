@@ -30,7 +30,7 @@ change, Layers, `block` / `ticket` / `talk`, ✎ and →) are explained in
 | **pebbles and rocks** | the things in the code (pebbles) and the places the team puts them, with the ones that look alike (rocks) |
 | **neighbours** | existing code to compare new code with: of the same **kind** (the other details pages, wherever they are) or in the same **place** (the other files in that folder) |
 | **differs from neighbours** | new code that does something differently from its neighbours |
-| **the map** | `review/MAP.toml` (and `MAP.md` for people): where a project's team puts each kind of thing, built by the `taste` skill |
+| **the map** | `<review-records>/MAP.toml` (and `MAP.md` for people): where a project's team puts each kind of thing, built by the `taste` skill |
 | **rock** (in the map) | one entry: one kind of thing, where the team puts it, and the counts behind it |
 | **settled / mixed / moving / questioned** | a rock's status: one way nearly everywhere / two or more ways / new code goes another way than old code / one way, but someone asked why |
 | **odd ones out** | the few places that do it differently from the rest. Name them: they're the ones someone copies next |

@@ -14,7 +14,7 @@ turns out wrong in practice, it gets rewritten here, with the date.
 ## 1. How we work
 
 **Reviews are read-only**, by the rules the review skills bring with them. The
-test and linter commands are in the workspace `CLAUDE.md`.
+test and linter commands are in `ENV.md`, next to this file.
 
 **What the linter covers:** <what it selects and ignores, if that matters for
 what counts as a finding.>

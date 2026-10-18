@@ -1,4 +1,5 @@
-"""Tests for scripts/note.py: the check before every render, and the renderer itself.
+"""Tests for scripts/note.py (the check before every render, and the renderer
+itself) and, from start_tests.py, for scripts/start.py.
 
     python3 -B tests/run.py
 
@@ -13,6 +14,8 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+from start_tests import *  # noqa: F401,F403  the start check's tests run here too
 
 HERE = Path(__file__).parent
 NOTE = HERE.parent / "scripts" / "note.py"

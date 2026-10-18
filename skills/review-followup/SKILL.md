@@ -1,6 +1,6 @@
 ---
 name: review-followup
-description: Keep the review records straight after a review note exists — tick rows, re-score a finding the operator corrected, park items, carry items to the end of a stack, walk through the parked items once a review's findings are all handled, tidy the map of where the team puts things (review/MAP.toml) after a review, and keep the note, review/TODO.md, the stack plan and the review log in review/LOG.md saying the same thing. Use this whenever the operator responds to findings already written down ("1 is intended, check", "tick 2 and 3", "D1 is fine", "I'll talk to them", "we decided to remove it", "note this for the end", "keep this for a recheck", "mark a cleanup on these at the end", "let's wait here", "let's go through the other finds"), and whenever a finding's premise changes after the note was written. Writes only in review/; never edits the project, never runs git writes, never runs tests unless the workspace allows it.
+description: Keep the review records straight after a review note exists — tick rows, re-score a finding the operator corrected, park items, carry items to the end of a stack, walk through the parked items once a review's findings are all handled, tidy the map of where the team puts things (MAP.toml) after a review, and keep the note, TODO.md, the stack plan and the review log in LOG.md saying the same thing, in the project's review-records folder. Use this whenever the operator responds to findings already written down ("1 is intended, check", "tick 2 and 3", "D1 is fine", "I'll talk to them", "we decided to remove it", "note this for the end", "keep this for a recheck", "mark a cleanup on these at the end", "let's wait here", "let's go through the other finds"), and whenever a finding's premise changes after the note was written. Writes only in the review-records folder; never edits the project, never runs git writes, never runs tests unless the project's ENV.md allows it.
 ---
 
 # After the note: keeping the records straight
@@ -17,8 +17,10 @@ paragraph — follows the `review-writing` skill.
 
 **First, load and print the rules**: read
 `${CLAUDE_PLUGIN_ROOT}/reference/rules.md` and print its block, with
-`review-followup` as what loaded it. They hold here exactly as in a review.
-This skill writes only in `review/`.
+`review-followup` as what loaded it. They hold here exactly as in a review. Its
+start check (§0) runs first: it finds this project's review-records folder,
+`<review-records>/`, and stops before the project is read when the session has
+no deny rules loaded. This skill writes only in `<review-records>/`.
 
 ## Where each finding lives
 
@@ -27,13 +29,13 @@ them in the same step.
 
 | Place | What it holds |
 |---|---|
-| The note's data file, `review/mr-<n>-<branch>.toml` | The finding itself: ticked, scores, verdict, text and draft. The `.md` next to it is rendered from this file, never edited by hand |
-| `review/TODO.md` | One `R` line per finding, under the MR's heading |
-| The stack plan, `review/<stack>-stack-plan.md` | For a stack: the step's row, items carried to the end, watch lists |
-| The review log, `review/LOG.md` | One row per review: the worst row and its verdict |
+| The note's data file, `<review-records>/mr-<n>-<branch>.toml` | The finding itself: ticked, scores, verdict, text and draft. The `.md` next to it is rendered from this file, never edited by hand |
+| `<review-records>/TODO.md` | One `R` line per finding, under the MR's heading |
+| The stack plan, `<review-records>/<stack>-stack-plan.md` | For a stack: the step's row, items carried to the end, watch lists |
+| The review log, `<review-records>/LOG.md` | One row per review: the worst row and its verdict |
 
-Pre-existing weaknesses go to `review/ISSUES.md` instead (the revert test in
-the `mr-review` skill), never as a finding.
+Pre-existing weaknesses go to `<review-records>/ISSUES.md` instead (the revert
+test in the `mr-review` skill), never as a finding.
 
 ## TODO lines
 
@@ -57,8 +59,8 @@ the `mr-review` skill), never as a finding.
   example lines in the file never match:
 
   ```
-  grep -o '\*\*R[0-9]\+\*\*' review/TODO.md | tr -dc '0-9\n' | sort -n | tail -1
-  grep -o '\*\*A[0-9]\+\*\*' review/TODO.md | tr -dc '0-9\n' | sort -n | tail -1
+  grep -o '\*\*R[0-9]\+\*\*' <review-records>/TODO.md | tr -dc '0-9\n' | sort -n | tail -1
+  grep -o '\*\*A[0-9]\+\*\*' <review-records>/TODO.md | tr -dc '0-9\n' | sort -n | tail -1
   ```
 - The text follows the title rules in `review-writing`.
 
@@ -86,15 +88,15 @@ your own judgement.
 
 ## When the last box is ticked
 
-When a tick leaves no open row in the note, the review's findings are done.
-Look in `review/TODO.md` for open lines tagged with this review — `(MR <n>)`
-and `(zoom-in MR <n> …)` — that are not the note's own findings.
+When a tick leaves no open row in the note, the review's findings are done. Look
+in `<review-records>/TODO.md` for open lines tagged with this review — `(MR
+<n>)` and `(zoom-in MR <n> …)` — that are not the note's own findings.
 
 If there are any, ask once, in one line, and say in half a sentence what the
 list is, because the operator may never have seen it:
 
 > All findings on MR 13 are handled. While reviewing, I parked 4 other things
-> I noticed on the side (the A list in `review/TODO.md`) — go through them now?
+> I noticed on the side (the A list in `<review-records>/TODO.md`) — go through them now?
 
 If there are none, say only that the findings are all handled. Either way,
 then tidy the map (below), if there is one.
@@ -105,7 +107,7 @@ in one or two sentences, and offer the four choices:
 | Choice | What happens to the line |
 |---|---|
 | ticket | Ticked, with "ticket: <where>" and the date |
-| issue | Moved into `review/ISSUES.md` as a new issue; the TODO line is ticked with "→ ISS-<n>" |
+| issue | Moved into `<review-records>/ISSUES.md` as a new issue; the TODO line is ticked with "→ ISS-<n>" |
 | drop | Ticked, with "dropped" and the date. The line stays |
 | keep | Left open. Nothing changes |
 
@@ -116,13 +118,13 @@ remaining lines simply stay open.
 ## Tidy the map
 
 When a review's findings are all handled and the project has a
-`review/MAP.toml`, tidy the entries that review touched (those whose `find`
-patterns match its files). Lightly: it's there to keep the map pleasant to
-use, not to audit it. The `taste` skill describes the entries.
+`<review-records>/MAP.toml`, tidy the entries that review touched (those whose
+`find` patterns match its files). Lightly: it's there to keep the map pleasant
+to use, not to audit it. The `taste` skill describes the entries.
 
 - **Without asking:** recount those entries at the current commit, update
   their counts, `direction` and `counted_at`, and add a row to
-  `review/taste/scans.md`.
+  `<review-records>/taste/scans.md`.
 - **Offered, one short message, yes or no per line**, only what applies:
   - a reason the operator gave during the follow-up, as a dated `why` with
     who said it ("you said the address is written out so grep finds it; keep
@@ -170,7 +172,7 @@ what was decided, what is served — re-score where everyone can see it:
   new fact, where it came from by role (the operator, the author in an MR
   comment, the deploy config — never a person's name), and what it changes.
 - Update the TODO line and, if it was the worst row, the review log in
-  `review/LOG.md`.
+  `<review-records>/LOG.md`.
 - If the change leaves something behind (a recheck before merge, a smaller
   finding), say so in the same paragraph.
 
@@ -186,9 +188,9 @@ cleanup at the end":
   recheck at the end", "Comment cleanup — once, at the end", "Linter — once,
   at the end". Each item names where it came from, which later steps touch the
   same code (a watch list), what "fixed" looks like, and how to recheck it.
-- **A probe that proves it** is copied into `review/probes/mr-<n>/`, so it
-  outlives the session's scratchpad. The recheck instructions name it. It holds
-  made-up data only, and it goes when its MR's note goes.
+- **A probe that proves it** is copied into `<review-records>/probes/mr-<n>/`,
+  so it outlives the session's scratchpad. The recheck instructions name it. It
+  holds made-up data only, and it goes when its MR's note goes.
 - **Not a stack:** a heading of its own in TODO ("Sweep — <topic> — to plan"),
   with the starting points listed.
 
@@ -200,15 +202,16 @@ under the item: "Step 3 checked: not touched".
 `mr-review` offers, at the start of a review, to clean up notes whose MR looks
 merged or closed. When the operator says yes for an MR, and only then:
 
-- delete its note (`review/mr-<n>-*`) and its probes (`review/probes/mr-<n>/`);
-- delete its ticked R and A lines from `review/TODO.md`, and the MR heading if
-  nothing is left under it. Its **open** A lines stay: they are work still to
-  do somewhere else;
-- keep its row in `review/LOG.md`. That row, the tickets and `ISSUES.md` are
-  the history that stays.
+- delete its note (`<review-records>/mr-<n>-*`) and its probes
+  (`<review-records>/probes/mr-<n>/`);
+- delete its ticked R and A lines from `<review-records>/TODO.md`, and the MR
+  heading if nothing is left under it. Its **open** A lines stay: they are work
+  still to do somewhere else;
+- keep its row in `<review-records>/LOG.md`. That row, the tickets and
+  `ISSUES.md` are the history that stays.
 
 Say in one line what went. A probe that was moved into the plugin as a test
-fixture is no longer in `review/` and is not touched.
+fixture is no longer in `<review-records>/` and is not touched.
 
 ## Pausing
 
@@ -229,7 +232,7 @@ Re-read every place you touched and check they agree: the data file, the TODO
 line, the plan, the log row. Then check the data file and render the note:
 
 ```
-python3 -B ${CLAUDE_PLUGIN_ROOT}/scripts/note.py render review/<the note>.toml
+python3 -B ${CLAUDE_PLUGIN_ROOT}/scripts/note.py render <review-records>/<the note>.toml
 ```
 
 Answer in a few lines: what changed, where. No recap of findings that did not

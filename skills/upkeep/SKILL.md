@@ -1,6 +1,6 @@
 ---
 name: upkeep
-description: Check the state of everything the review skills read in a workspace — REVIEW.md, the project's rule documents, the map (review/MAP.toml), TODO.md, ISSUES.md, LOG.md and the notes — and offer a short list of trims and questions that make it cheaper to read and decide on, for the operator and for Claude. Finds the same rule written twice, rules that contradict each other, rules without a reason, stale items, unexplained terms, and files that are loaded whole but needed only in part. Use when the operator asks to "tidy up", "check the state of our review files", "what's stale", "clean up the rules", "upkeep", or every so often between reviews. Writes only in review/, and only what the operator says yes to.
+description: Check the state of everything the review skills read for a project — REVIEW.md, the project's rule documents, the map (MAP.toml), TODO.md, ISSUES.md, LOG.md and the notes — and offer a short list of trims and questions that make it cheaper to read and decide on, for the operator and for Claude. Finds the same rule written twice, rules that contradict each other, rules without a reason, stale items, unexplained terms, and files that are loaded whole but needed only in part. Use when the operator asks to "tidy up", "check the state of our review files", "what's stale", "clean up the rules", "upkeep", or every so often between reviews. Writes only in the project's review-records folder, and only what the operator says yes to.
 ---
 
 # Keeping the review files cheap to use
@@ -17,15 +17,19 @@ check, run now and then.
 
 ## The rules
 
-Load and print the rules block from `${CLAUDE_PLUGIN_ROOT}/reference/rules.md`, with `upkeep` as
-what loaded it. The project is read-only. In `review/`, nothing changes
-without the operator's yes, except what this file marks as automatic.
+Load and print the rules block from `${CLAUDE_PLUGIN_ROOT}/reference/rules.md`,
+with `upkeep` as what loaded it. Its start check (§0) runs first: it finds this
+project's review-records folder, `<review-records>/`, and stops before the
+project is read when the session has no deny rules loaded. The project is
+read-only. In `<review-records>/`, nothing changes without the operator's yes,
+except what this file marks as automatic.
 
 ## What it reads
 
-The workspace `CLAUDE.md`, `review/REVIEW.md`, the rule documents it names
-(read only, never changed here), `review/MAP.toml`, `review/TODO.md`,
-`review/ISSUES.md`, `review/LOG.md`, and the notes in `review/`.
+`<review-records>/ENV.md`, `<review-records>/REVIEW.md`, the rule documents it
+names (read only, never changed here), `<review-records>/MAP.toml`,
+`<review-records>/TODO.md`, `<review-records>/ISSUES.md`,
+`<review-records>/LOG.md`, and the notes in `<review-records>/`.
 
 ## What it looks for
 
