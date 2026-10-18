@@ -2,7 +2,7 @@
   "name": "review-skills",
   "description": "Review skills for merge requests, shared by the team.",
   "owner": {
-    "name": "Florisjan Gerrits"
+    "name": "Floris Jan Gerrits"
   },
   "plugins": [
     {

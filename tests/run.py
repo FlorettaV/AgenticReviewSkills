@@ -76,7 +76,7 @@ BAD = [
      (('[rules_walked]\nReadable = "nothing"\nManageable = "D2"\nLinter = "nothing"\n'
        'Architecture = "nothing"\nTested = "D2"\nPayments = "nothing"\n'), ""), "[rules_walked] is empty"),
     ("a real e-mail address",
-     ("An old shop's settings\nstill say", "The shop of <customer email> (anna@realshop.nl)\nstill says"),
+     ("An old shop's settings\nstill say", "The shop of <customer email> (anna@fake-shop-example.nl)\nstill says"),
      "e-mail address"),
     ("wrong format number",
      ("format = 2", "format = 3"), "this plugin writes format 2"),

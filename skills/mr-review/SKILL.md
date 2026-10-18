@@ -1,6 +1,6 @@
 ---
 name: mr-review
-description: Review a merge request against review/REVIEW.md in two halves — customer (what a customer or operator experiences in normal use, scored on chance and harm) and developer (what we decided in the code: security, GDPR, how failures hide, and what the next developer runs into, walked rule by rule) — with branch identity, verified findings tables, an architecture check, disposition. Use this whenever the operator asks to review an MR, a branch, or a set of changes ("review MR 13", "can we do a review on feat/x", "what do you think of this branch", "code only review of SWD-12", "just the customer side"), when they ask to add the missing half to an existing note ("now do the code side too"), and when they ask what changed on a branch or whether a change is safe to merge. Read-only: it never edits the project, never runs git writes, and runs tests only if the workspace allows it.
+description: Review a merge request against review/REVIEW.md in two halves — customer (what a customer or operator experiences in normal use, scored on chance and harm) and developer (what we decided in the code: security, GDPR, how failures hide, and what the next developer runs into, walked rule by rule, plus how it fits the code around it) — with branch identity, verified findings tables, an architecture check, disposition. Use this whenever the operator asks to review an MR, a branch, or a set of changes ("review MR 13", "can we do a review on feat/x", "what do you think of this branch", "code only review of ABC-12", "just the customer side"), when they ask to add the missing half to an existing note ("now do the code side too"), and when they ask what changed on a branch or whether a change is safe to merge. Read-only: it never edits the project, never runs git writes, and runs tests only if the workspace allows it.
 ---
 
 # Reviewing an MR
@@ -153,8 +153,8 @@ one, nothing is touched.
 ## The method
 
 Steps 1–4 and 6–9 are the review itself, the same whichever half was asked
-for. Step 5 is the customer lens, step 10 the developer lens. A review that
-runs one half skips only the other half's lens step.
+for. Step 5 is the customer lens, steps 10 and 11 the developer lens. A review
+that runs one half skips only the other half's lens steps.
 
 ### 1. Identity before anything
 
@@ -326,6 +326,9 @@ the note's "Rules walked" list (below). A rule with no line in that list was
 not walked.
 That list is the guard: a skipped rule becomes visible.
 
+Then **Neighbours** (step 11), which is walked in this lens too and gets its
+own line in "Rules walked".
+
 The two §3 questions that matter most were asked earlier and count here too:
 "who else reads this?" (step 3) and keeping the security topic out of a
 helper's hands (step 8). A developer-only review runs them like any other.
@@ -333,6 +336,68 @@ helper's hands (step 8). A developer-only review runs them like any other.
 Every developer finding is verified like any other (step 9): print the lines,
 run the probe. "This test only checks the text" is proven by showing the
 change it lets through.
+
+### 11. Neighbours: does it look like the code around it?
+
+Steps 1–10 find what breaks. This step finds what a human reviewer would
+comment on: the spots where a reader stops, jumps to another file, or asks
+"why is this here?". It runs **after** the bug-finding, and never instead of
+it: a review short on time cuts this step, not those. A bug found here (the
+neighbours handle a case the new code forgets) is a bug, and is written up
+like one, under the step that owns it. People don't judge new code against a rule. They judge it
+against the code they know. Why this matters: `${CLAUDE_PLUGIN_ROOT}/docs/how-people-place-things.md`.
+
+For every new thing in the change (a page, an action, a hook, a type, a URL,
+a list, an error message, a name), ask three questions:
+
+1. **Does it look like its neighbours?** Find existing things of the same
+   kind. Look two ways and say which you used: the same *place* (the other
+   sections on that page, the other files in that folder) and the same *kind*
+   (the other providers, the other details pages, wherever they live).
+   Compare where things live, how they're written, what they're called.
+2. **Is any of it already done somewhere else?** Data the page already has,
+   a check a hook, a shared component or the backend already does.
+3. **Where would a reader stop and ask why?** Two things that look alike but
+   are handled differently. Two things a user experiences as one (two places
+   that show an error) that the code keeps apart. Numbers that don't fit
+   together (fetch 25, show 5). An exception to a pattern with nothing saying
+   why.
+
+**Use the map when there is one.** `review/MAP.toml` (made by the `taste`
+skill) says where the team puts each kind of thing, which file is the example,
+and how settled it is. Load only the entries whose `find` patterns match the
+files the MR touches. Then:
+
+| The entry is | Then |
+|---|---|
+| settled, and the change does it differently | a finding: "the others do it like this, see <example>" |
+| moving, and the change does it the old way | a finding pointing at the newer way |
+| mixed or questioned | no finding; its question goes to the operator, with the counts |
+
+A why on an entry is context for the finding, never a reason to leave it out.
+When the project has no map, the neighbours are found by hand, and the reply
+gives the `taste` hint once.
+
+**When logic and the team disagree**, don't write "fix this". Write it as a
+question with the likely answer: "Plain logic would use one constant for this
+address, but the team writes addresses out (215 times). Is the constant on
+purpose?" The neighbours can be the odd ones out: the only two URL constants
+in one project were in the pages a new MR had copied from.
+
+**How these findings are written:**
+
+- They're `D` findings with `Neighbours` in the Rule cell, and Next change
+  scored as usual. They rarely block: the author may differ on purpose.
+- The Cause points at the neighbour as well as the change, so the finding
+  works as a reminder: the reader may know that file.
+- Verified like any other finding (step 9): print the lines of the change
+  *and* of the neighbour it's compared with.
+- Fewer, stronger points. Leave out anything that's only a preference with no
+  neighbour or map entry behind it. A blind test that listed 16 of these was
+  too much to read.
+
+Write down what this step turned up, "nothing" included, as the `Neighbours`
+line in Rules walked.
 
 ## Output
 
@@ -346,7 +411,7 @@ scored in this project. The renderer draws the tables.
 
 **Load the `review-writing` skill now** (`review:review-writing`), and follow its three steps:
 
-1. **Draft** every finding in its draft shape, from what steps 1–10 verified.
+1. **Draft** every finding in its draft shape, from what steps 1–11 verified.
 2. **Write** the note's data file, `review/mr-<n>-<branch-slug>.toml`. It is
    the note: every skill reads and writes it, and the Markdown note is rendered
    from it. `${CLAUDE_PLUGIN_ROOT}/tests/fixtures/valid.toml` is a complete
@@ -359,9 +424,9 @@ scored in this project. The renderer draws the tables.
    - one `[[finding]]` per finding, in table order, worst first per half:
      its `id` (`3`, `D2`), title, scores, verdict, cause, What happens, Why,
      Fix, justify, `ticked = false`, and its `[finding.draft]`;
-   - `[rules_walked]`, when the developer half ran: one key per §2 rule and
-     per §3 area, by short name, naming the findings it produced, or
-     "nothing".
+   - `[rules_walked]`, when the developer half ran: one key per §2 rule, per
+     §3 area and `Neighbours`, by short name, naming the findings it
+     produced, or "nothing".
 3. **Edit**: run the editor pass, then render. Both are described there.
    `render` checks the file first and writes the note only when nothing is
    wrong.
@@ -401,6 +466,11 @@ operator says afterwards:
 - one `R` line per finding in `review/TODO.md`, under a heading for this MR,
   developer findings tagged with their number: `(MR <n> D1)`;
 - for a stack, the step's row in the plan file.
+
+Anything else written for this MR (a prediction of the comments, a comparison
+with what reviewers said) goes in `review/experiments/`, never under the
+`mr-<n>-*` name: that name means a note, and the skills treat every file
+with it as one.
 
 ## Parking what you did not come for
 
