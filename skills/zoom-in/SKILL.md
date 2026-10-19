@@ -91,7 +91,7 @@ Inside the fence, write the Markdown that GitLab and GitHub both read:
 - **The three labels are bold**, each starting its own paragraph:
   `**What happens.**`, `**Why.**`, `**Fix.**`.
 - **Every `file:line` is inline code**: `` `shop/pricing.py:142` ``. The `✎` /
-  `→` marker goes outside the backticks: ✎ `pricing.py:142`. Function,
+  `→` marker goes outside the backticks: ✎ `shop/pricing.py:142`. Function,
   variable and setting names are inline code too: `VAT_RATE`, `round_price()`.
 - **Code is always a fenced block with a language tag** (` ```python `,
   ` ```bash `, ` ```yaml `), so the code host highlights it and the reader can

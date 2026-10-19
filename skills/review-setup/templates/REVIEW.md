@@ -23,6 +23,9 @@ what counts as a finding.>
 the `.md` rendered from it, in this folder.
 Pre-existing weaknesses go in `ISSUES.md` instead — see §5.
 
+Map: none yet
+Upkeep: not run yet
+
 **Merge requests are identified by branch.** <With `gh`/`glab`: the CLI maps
 number to branch. Without: confirm the mapping by hand at the start.>
 

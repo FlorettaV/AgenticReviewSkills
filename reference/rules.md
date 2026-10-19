@@ -26,6 +26,7 @@ print it exactly:
     Probes go in the scratchpad, with made-up data.
   • Linter: <command> from <folder>, cache off. <| No linter.>
   • Anything noticed on the side goes onto the A list, silently.
+  • Code is pointed at as `path/from/the/repo/root:line`, read on the branch.
 ```
 
 ## 0. The start check
@@ -212,7 +213,23 @@ that surfaces goes onto the A list in `<review-records>/TODO.md` silently: no
 "I've added this to the list". A reply carrying six related findings buries the
 one question that was asked.
 
-## 9. What enforces this
+## 9. Pointing at code
+
+Every pointer to code, in a note or in a reply, takes one shape:
+`` `quality/tests/conftest.py:13` ``. A range is `quality/tests/conftest.py:13-18`,
+and a file without a line is its path alone.
+
+- **The full path from the repository root**, every time. Never the file name
+  alone, however unique it looks: the reader still has to find it.
+- **The line is read, not remembered.** Before giving it, print it on the
+  branch the review is about (`git grep -n -F "<exact text>" origin/<branch> --
+  <path>`, or `git show origin/<branch>:<path> | sed -n '<n>p'`), and check
+  that it shows what the pointer claims. A line that can't be checked is not
+  given: say the file and what to search for instead.
+- **The branch is said** when it isn't the one under review: "on main,
+  `quality/tests/conftest.py:13`".
+
+## 10. What enforces this
 
 The rules above are the first layer. The second is Claude Code's own deny
 rules, in the plugin's `reference/deny.json`: they block every file edit under

@@ -19,7 +19,9 @@ and Claude runs that command to prove they are live.
 
 `settings` writes <review-store>/review-settings.json, for `claude --settings`:
 the plugin's deny rules, the review store as a folder Claude may read and write
-without asking, and this check as a command it may run without asking. It adds what is missing and keeps everything else.
+without asking, this check as a command it may run without asking, and PIN_CWD,
+so a `cd` never moves the deny rule on edits. It adds what is missing and keeps
+everything else.
 
 Exit codes: 0 ready, 1 a problem stops the review, 2 usage.
 """
@@ -36,6 +38,11 @@ DENY = HERE.parent / "reference" / "deny.json"
 CANARY = "review-guard-canary"
 # The plugin folder changes with every version, so the rule matches any of them.
 START_CHECK = "Bash(python3 -B */scripts/start.py check*)"
+# `Edit(./**)` is read against the shell's current folder, and a `cd` into the
+# review store (an additional directory) carries over to later commands. The
+# deny rule then covers the review store instead of the project, and wins over
+# the allow rule there. With this set, every command starts in the project.
+PIN_CWD = ("CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR", "1")
 
 
 def config_path() -> Path:
@@ -144,7 +151,11 @@ def deny_rules(data: dict) -> list[str]:
 
 def missing(sources: list[tuple[str, dict]], wanted: list[str]) -> list[str]:
     have = {rule for _, data in sources for rule in deny_rules(data)}
-    return [rule for rule in wanted if rule not in have]
+    gaps = [rule for rule in wanted if rule not in have]
+    key, value = PIN_CWD
+    if not any(str(data.get("env", {}).get(key)) == value for _, data in sources):
+        gaps.append(f"env {key}={value}")
+    return gaps
 
 
 # --- the project and its records -----------------------------------------
@@ -248,7 +259,8 @@ def check(project_arg: str | None) -> int:
             gaps = [g for g in gaps if CANARY not in g]
             say("protection", f"own settings, {own_path}")
             for gap in gaps:
-                say("gap", f"{gap} is not denied there")
+                say("gap", f"{gap} is not set there" if gap.startswith("env ")
+                    else f"{gap} is not denied there")
         else:
             say("protection", f"own settings {own_path}, but this session did not load it")
             problems.append(f"start Claude with --settings {own_path}")
@@ -257,7 +269,7 @@ def check(project_arg: str | None) -> int:
         if not gaps:
             say("protection", "plugin rules, all loaded")
             say("next", f"run `{CANARY}`; Claude Code must refuse it")
-        elif len(gaps) == len(plugin_rules()):
+        elif len(gaps) > len(plugin_rules()):
             say("protection", "none: the plugin's deny rules are not loaded")
             settings = (store or Path("<review-store>")) / "review-settings.json"
             problems.append(f"start Claude with --settings {settings}")
@@ -296,6 +308,11 @@ def write_settings(store_arg: str) -> int:
         new = [item for item in wanted if item not in have]
         have.extend(new)
         added += new
+    key, value = PIN_CWD
+    env = data.setdefault("env", {})
+    if env.get(key) != value:
+        env[key] = value
+        added.append(f"env {key}={value}")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
     print(f"{path}: {len(added)} rules added" if added else f"{path}: already up to date")
