@@ -42,6 +42,12 @@ names (read only, never changed here), `<review-records>/MAP.toml`,
    document against the map's counts ("the docs say X, the code does Y in 200
    places"). Never resolved here: each becomes a question for the team, with
    the likely answer and the numbers, as in the `taste` skill.
+   The reasons are checked in the same pass: a why on a map entry, or the
+   "because" of a rule, that a rule document or `REVIEW.md` contradicts
+   ("operator, 2026-10: written out so grep finds the path" against a rule
+   doc that says to use constants), or that names something the project no
+   longer has (a tool, a folder, a script). The same kind of question, with
+   the quote and what it clashes with. A why still never changes a status.
 3. **Rules without a reason.** A rule with no "because" gets applied too
    literally. Offer to add one line of why, only from the operator or a
    document, never invented.
@@ -68,8 +74,10 @@ names (read only, never changed here), `<review-records>/MAP.toml`,
    `talk` findings in notes that never got an answer. List them, so the
    operator can pick a good moment to ask.
 
-**Automatic, no question:** fixing a pointer to a file that moved, and
-re-sorting the LOG by date. Everything else is offered.
+**Automatic, no question:** fixing a pointer to a file that moved,
+re-sorting the LOG by date, and the `Upkeep: last run <date>` line in
+`REVIEW.md` §1 (under the `Map:` line), which `mr-review` reads to know when
+to suggest the next run. Everything else is offered.
 
 ## The list
 

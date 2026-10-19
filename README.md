@@ -46,8 +46,11 @@ The first time, `review-setup` asks where review records should go: the **review
 store**, one folder for every project's reviews, outside every git repository so
 notes never end up in a commit (`~/reviews` will do). It keeps that in
 `~/.config/review-skills/config.toml`, and writes the plugin's deny rules to
-`<review-store>/review-settings.json`. Then it asks a handful of questions about
-the project and writes its review-records folder:
+`<review-store>/review-settings.json`. Then it reads the project, writes its
+review-records folder from what it found, and shows you what it set and where
+it found it, so you only correct what's off. It asks three questions the code
+can't answer (who sees the effect, personal data, areas to watch), and offers a
+`taste` scan of how the code is written, whose questions are optional:
 
 ```
 ~/reviews/                      the review store

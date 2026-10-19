@@ -462,6 +462,17 @@ full (or the one that ran, with a line saying which did not), what blocks, the
 questions for the operator, the commands. The What / Why / Fix stays in the
 note until the operator asks; the `zoom-in` skill produces it.
 
+Last, at most one line each, only when due, from `REVIEW.md` §1:
+
+| Line | Due when | The line |
+|---|---|---|
+| `Map:` | none yet | the `taste` hint (§11) |
+| `Map:` | counted more than 3 months ago, or 200 commits or more on the default branch since (`git rev-list --count <commit>..origin/<default>`) | 💡 The map of the team's habits is from <date>, <n> commits ago. `/review:taste rescan` recounts it. |
+| `Upkeep:` | last run more than 3 months ago, or 10 reviews or more in `LOG.md` since; never run counts from the first row in `LOG.md` | 💡 The review files haven't had a tidy since <date> (<n> reviews). `/review:upkeep` offers a short list of trims. |
+
+A missing line counts as "none yet" or "never run". Each is said once per
+review, never during one.
+
 ### On publishing
 
 Three small writes, then hand over to `review-followup` for everything the

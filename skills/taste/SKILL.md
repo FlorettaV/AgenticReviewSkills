@@ -44,7 +44,7 @@ three hold here:
 | `<review-records>/taste/records.jsonl` | only when review comments were read: one decision record per human thread |
 
 `REVIEW.md` says where the map is and when it was last counted
-(`Map: MAP.toml, counted <date> at <commit>`). It never copies map
+(`Map: MAP.toml, counted <date> at <commit>`, in §1, above the `Upkeep:` line). It never copies map
 entries: placement lives in the map only, so the same rule never sits in two
 places with different wording.
 
