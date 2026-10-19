@@ -1,7 +1,7 @@
 {
   "name": "review",
   "version": "0.2.0",
-  "description": "Read-only merge request reviews: verified findings in plain language, a fixed scoring table, and records that stay in step.",
+  "description": "Read-only merge request reviews in two halves, customer and developer: verified findings with file:line, in plain language. Learns where your team puts things from the code and its history, and keeps every review record outside the repository.",
   "author": { "name": "Floris Jan Gerrits" },
-  "keywords": ["code-review", "merge-request", "gitlab"]
+  "keywords": ["code-review", "merge-request", "pull-request", "gitlab", "github", "read-only", "team-conventions"]
 }
